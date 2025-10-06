@@ -235,7 +235,7 @@ class AppTranslations {
   // ============= AGENT MANAGEMENT =============
   static const Map<String, String> agent = {
     // Agent Search
-    'find_agent': 'Trouver un agent',
+    'find_an_agent': 'Trouver un agent',
     'search_by_name_location': 'Rechercher par nom, lieu...',
     'all_filters': 'Tous les filtres',
 
@@ -385,6 +385,34 @@ class AppTranslations {
     'contact_email': 'contact@zibenesecurity.com',
     'contact_phone': '+1 (234) 567-890',
     'contact_address': '123 Avenue de la Sécurité, Bureau 100, Métropole, ST 12345',
+
+    // Help Screen translations
+    'how_can_help_you': 'Comment pouvons-nous vous aider ?',
+    'support_team_available_24_7': 'Notre équipe de support est disponible 24/7',
+    'learn_how_to_use_app': 'Apprendre à utiliser l\'application',
+    'watch_step_by_step_guides': 'Regarder les guides pas à pas',
+    'search_faqs': 'Rechercher les FAQs',
+    'search_for_help_topics': 'Rechercher des sujets d\'aide...',
+    'frequently_asked_questions': 'Questions Fréquemment Posées',
+    'user_guide': 'Guide Utilisateur',
+    'video_tutorials': 'Tutoriels Vidéo',
+    'faq_booking_title': 'Comment réserver un agent de sécurité ?',
+    'faq_booking_content': 'Pour réserver un agent de sécurité, allez dans l\'onglet "Trouver des agents", parcourez les agents disponibles, sélectionnez votre agent préféré, choisissez votre date et heure, et confirmez votre réservation.',
+    'faq_payment_title': 'Quelles sont les options de paiement ?',
+    'faq_payment_content': 'Nous acceptons toutes les cartes de crédit majeures, les cartes de débit, PayPal, Apple Pay et les virements bancaires. Tous les paiements sont traités de manière sécurisée.',
+    'faq_cancellation_title': 'Puis-je annuler ma réservation ?',
+    'faq_cancellation_content': 'Oui, vous pouvez annuler votre réservation jusqu\'à 24 heures avant l\'heure prévue pour un remboursement complet. Les annulations dans les 24 heures peuvent entraîner des frais.',
+    'faq_verification_title': 'Comment les agents sont-ils vérifiés ?',
+    'faq_verification_content': 'Tous nos agents de sécurité subissent des vérifications d\'antécédents approfondies, une vérification des certifications et des entretiens en personne avant d\'être approuvés.',
+    'support_line_24_7': 'Ligne de Support 24/7',
+    'call_now': 'Appeler maintenant',
+    'send_us_message': 'Envoyez-nous un message',
+    'your_email': 'Votre Email',
+    'subject': 'Sujet',
+    'describe_your_issue': 'Décrivez votre problème...',
+    'send_message': 'Envoyer le message',
+    'legal_information': 'Informations Légales',
+    'search_faqs_placeholder': 'Rechercher des sujets d\'aide...',
   };
 
   // ============= NOTIFICATIONS =============

@@ -62,8 +62,8 @@ class HelpSupportScreen extends StatelessWidget {
                 Expanded(
                   child: _HelpCard(
                     icon: Icons.book_outlined,
-                    title: 'User Guide',
-                    subtitle: 'Learn how to use the app',
+                    title: 'user_guide'.t(context),
+                    subtitle: 'learn_how_to_use_app'.t(context),
                     color: AppColors.info,
                     onTap: () {},
                   ),
@@ -72,8 +72,8 @@ class HelpSupportScreen extends StatelessWidget {
                 Expanded(
                   child: _HelpCard(
                     icon: Icons.video_library_outlined,
-                    title: 'Video Tutorials',
-                    subtitle: 'Watch step-by-step guides',
+                    title: 'video_tutorials'.t(context),
+                    subtitle: 'watch_step_by_step_guides'.t(context),
                     color: AppColors.success,
                     onTap: () {},
                   ),
@@ -81,52 +81,52 @@ class HelpSupportScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Search FAQs',
-              style: TextStyle(
+            Text(
+              'search_faqs'.t(context),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
             TextField(
-              decoration: const InputDecoration(
-                hintText: 'Search for help topics...',
-                prefixIcon: Icon(Icons.search),
+              decoration: InputDecoration(
+                hintText: 'search_faqs_placeholder'.t(context),
+                prefixIcon: const Icon(Icons.search),
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Frequently Asked Questions',
-              style: TextStyle(
+            Text(
+              'frequently_asked_questions'.t(context),
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            const _Faq(
-              title: 'How do I book a security agent?',
-              content: 'To book a security agent, go to the "Find Agents" tab, browse available agents, select your preferred agent, choose your date and time, and confirm your booking.',
+            _Faq(
+              title: 'faq_booking_title'.t(context),
+              content: 'faq_booking_content'.t(context),
             ),
             const SizedBox(height: 8),
-            const _Faq(
-              title: 'What are the payment options?',
-              content: 'We accept all major credit cards, debit cards, PayPal, Apple Pay, and bank transfers. All payments are processed securely.',
+            _Faq(
+              title: 'faq_payment_title'.t(context),
+              content: 'faq_payment_content'.t(context),
             ),
             const SizedBox(height: 8),
-            const _Faq(
-              title: 'Can I cancel my booking?',
-              content: 'Yes, you can cancel your booking up to 24 hours before the scheduled time for a full refund. Cancellations within 24 hours may incur a fee.',
+            _Faq(
+              title: 'faq_cancellation_title'.t(context),
+              content: 'faq_cancellation_content'.t(context),
             ),
             const SizedBox(height: 8),
-            const _Faq(
-              title: 'How are agents verified?',
-              content: 'All our security agents undergo thorough background checks, certification verification, and in-person interviews before being approved.',
+            _Faq(
+              title: 'faq_verification_title'.t(context),
+              content: 'faq_verification_content'.t(context),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Contact Support',
-              style: TextStyle(
+            Text(
+              'contact_support'.t(context),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -152,12 +152,12 @@ class HelpSupportScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '24/7 Support Line',
+                                'support_line_24_7'.t(context),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -194,33 +194,33 @@ class HelpSupportScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Send us a message',
-                      style: TextStyle(
+                    Text(
+                      'send_us_message'.t(context),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Your Email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                      decoration: InputDecoration(
+                        hintText: 'your_email'.t(context),
+                        prefixIcon: const Icon(Icons.email_outlined),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Subject',
-                        prefixIcon: Icon(Icons.subject_outlined),
+                      decoration: InputDecoration(
+                        hintText: 'subject'.t(context),
+                        prefixIcon: const Icon(Icons.subject_outlined),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       maxLines: 4,
-                      decoration: const InputDecoration(
-                        hintText: 'Describe your issue...',
-                        prefixIcon: Icon(Icons.message_outlined),
+                      decoration: InputDecoration(
+                        hintText: 'describe_your_issue'.t(context),
+                        prefixIcon: const Icon(Icons.message_outlined),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -236,9 +236,9 @@ class HelpSupportScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Legal Information',
-              style: TextStyle(
+            Text(
+              'legal_information'.t(context),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
