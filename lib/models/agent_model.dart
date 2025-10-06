@@ -1,10 +1,12 @@
 import '../utils/firestore_utils.dart';
+import '../services/matricule_service.dart';
 import 'user_unified.dart';
 
 class Agent {
   final String id;
   final String userId;
   final String name;
+  final String matricule;
   final String email;
   final String? phone;
   final String? avatarUrl;
@@ -18,12 +20,24 @@ class Agent {
   final bool isApproved;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  // Nouveaux champs
+  final int age;
+  final String gender;
+  final String bloodGroup;
+  final String educationLevel;
+  final String antecedents;
 
   const Agent({
     required this.id,
     required this.userId,
     required this.name,
+    required this.matricule,
     required this.email,
+    required this.age,
+    required this.gender,
+    required this.bloodGroup,
+    required this.educationLevel,
+    required this.antecedents,
     this.phone,
     this.avatarUrl,
     this.bio = '',
@@ -42,7 +56,13 @@ class Agent {
     String? id,
     String? userId,
     String? name,
+    String? matricule,
     String? email,
+    int? age,
+    String? gender,
+    String? bloodGroup,
+    String? educationLevel,
+    String? antecedents,
     String? phone,
     String? avatarUrl,
     String? bio,
@@ -60,7 +80,13 @@ class Agent {
       id: id ?? this.id,
       userId: userId ?? this.userId,
       name: name ?? this.name,
+      matricule: matricule ?? this.matricule,
       email: email ?? this.email,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
+      bloodGroup: bloodGroup ?? this.bloodGroup,
+      educationLevel: educationLevel ?? this.educationLevel,
+      antecedents: antecedents ?? this.antecedents,
       phone: phone ?? this.phone,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       bio: bio ?? this.bio,
@@ -82,7 +108,13 @@ class Agent {
       id: data['id'] ?? '',
       userId: data['user_id'] ?? '',
       name: data['name'] ?? '',
+      matricule: data['matricule'] ?? '',
       email: data['email'] ?? '',
+      age: data['age'] ?? 0,
+      gender: data['gender'] ?? '',
+      bloodGroup: data['blood_group'] ?? '',
+      educationLevel: data['education_level'] ?? '',
+      antecedents: data['antecedents'] ?? '',
       phone: data['phone'],
       avatarUrl: data['avatar_url'],
       bio: data['bio'] ?? '',
@@ -112,7 +144,13 @@ class Agent {
       id: id.isNotEmpty ? id : user.id,
       userId: user.id,
       name: user.name,
+      matricule: MatriculeService.generateMatriculeForAgent(user.name),
       email: user.email,
+      age: 25, // Valeur par défaut
+      gender: 'Non spécifié', // Valeur par défaut
+      bloodGroup: 'Non spécifié', // Valeur par défaut
+      educationLevel: 'Non spécifié', // Valeur par défaut
+      antecedents: 'Non spécifié', // Valeur par défaut
       phone: user.phone,
       avatarUrl: user.avatarUrl,
       bio: bio,
@@ -134,7 +172,13 @@ class Agent {
       'id': id,
       'user_id': userId,
       'name': name,
+      'matricule': matricule,
       'email': email,
+      'age': age,
+      'gender': gender,
+      'blood_group': bloodGroup,
+      'education_level': educationLevel,
+      'antecedents': antecedents,
       'phone': phone,
       'avatar_url': avatarUrl,
       'bio': bio,
@@ -159,6 +203,30 @@ class Agent {
       return names[0][0].toUpperCase();
     }
     return '';
+  }
+
+  // Getter pour le matricule formaté
+  String get formattedMatricule {
+    return MatriculeService.formatMatriculeForDisplay(matricule);
+  }
+
+  // Getter pour le genre formaté
+  String get formattedGender {
+    switch (gender.toLowerCase()) {
+      case 'homme':
+      case 'male':
+        return 'Homme';
+      case 'femme':
+      case 'female':
+        return 'Femme';
+      default:
+        return gender;
+    }
+  }
+
+  // Getter pour l'âge formaté
+  String get formattedAge {
+    return '$age ans';
   }
 
   String get statusText {

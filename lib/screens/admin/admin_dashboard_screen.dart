@@ -149,7 +149,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Tableau de bord Admin',
+                          'Tableau de bord',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,

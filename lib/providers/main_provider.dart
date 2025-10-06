@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/firebase_service.dart';
+import '../services/admin_service.dart';
 import 'auth_provider.dart';
 import 'booking_provider.dart';
 import 'user_provider.dart';
@@ -73,23 +74,74 @@ class MainProvider extends ChangeNotifier {
   // Get system stats (for admin)
   Future<Map<String, dynamic>> getSystemStats() async {
     try {
-      // Get real counts from Firestore
+      debugPrint('Getting system stats...');
+
+      // Vérifier les permissions de l'utilisateur connecté
+      final currentUser = FirebaseService.auth.currentUser;
+      if (currentUser == null) {
+        debugPrint('ERROR: Aucun utilisateur Firebase connecté');
+        return _getErrorMap('No Firebase user connected');
+      }
+
+      debugPrint('UID utilisateur connecté: ${currentUser.uid}');
+      debugPrint('Email utilisateur: ${currentUser.email}');
+      debugPrint('Email vérifié: ${currentUser.emailVerified}');
+
+      // Get user count first
+      debugPrint('Tentative de lecture de la collection users...');
       final usersSnapshot = await FirebaseService.usersCollection.get();
-      final agentsSnapshot = await FirebaseService.agentsCollection.get();
-      final bookingsSnapshot = await FirebaseService.bookingsCollection.get();
-      final paymentsSnapshot = await FirebaseService.paymentsCollection.get();
-
       final totalUsers = usersSnapshot.docs.length;
-      final totalAgents = agentsSnapshot.docs.length;
-      final totalBookings = bookingsSnapshot.docs.length;
+      debugPrint('Users count: $totalUsers');
 
-      // Calculate total revenue from completed payments
-      double totalRevenue = 0;
-      for (var doc in paymentsSnapshot.docs) {
-        final payment = doc.data() as Map<String, dynamic>;
-        if (payment['status'] == 'completed') {
-          totalRevenue += (payment['amount'] as num).toDouble();
+      // Get agents count
+      int totalAgents = 0;
+      try {
+        debugPrint('Tentative de lecture de la collection agents...');
+        final agentsSnapshot = await FirebaseService.agentsCollection.get();
+        totalAgents = agentsSnapshot.docs.length;
+        debugPrint('SUCCESS: Agents count: $totalAgents');
+      } catch (e) {
+        debugPrint('ERROR getting agents count: $e');
+        debugPrint('Fallback: Counting agents from users collection...');
+        // Agents collection might not exist yet, count from users with agent role
+        totalAgents = usersSnapshot.docs
+            .where((doc) {
+              final data = doc.data() as Map<String, dynamic>?;
+              return data?['role'] == 'agent';
+            })
+            .length;
+        debugPrint('Fallback: Agents count from users: $totalAgents');
+      }
+
+      // Get bookings count
+      int totalBookings = 0;
+      try {
+        debugPrint('Tentative de lecture de la collection bookings...');
+        final bookingsSnapshot = await FirebaseService.bookingsCollection.get();
+        totalBookings = bookingsSnapshot.docs.length;
+        debugPrint('SUCCESS: Bookings count: $totalBookings');
+      } catch (e) {
+        debugPrint('ERROR getting bookings count: $e');
+        debugPrint('ERROR TYPE: ${e.runtimeType}');
+        debugPrint('ERROR MESSAGE: ${e.toString()}');
+      }
+
+      // Get payments revenue
+      double totalRevenue = 0.0;
+      try {
+        debugPrint('Tentative de lecture de la collection payments...');
+        final paymentsSnapshot = await FirebaseService.paymentsCollection.get();
+        for (var doc in paymentsSnapshot.docs) {
+          final payment = doc.data() as Map<String, dynamic>;
+          if (payment['status'] == 'completed') {
+            totalRevenue += (payment['amount'] as num).toDouble();
+          }
         }
+        debugPrint('SUCCESS: Total revenue: $totalRevenue');
+      } catch (e) {
+        debugPrint('ERROR getting payments: $e');
+        debugPrint('ERROR TYPE: ${e.runtimeType}');
+        debugPrint('ERROR MESSAGE: ${e.toString()}');
       }
 
       return {
@@ -100,14 +152,27 @@ class MainProvider extends ChangeNotifier {
       };
     } catch (e) {
       debugPrint('Error getting system stats: $e');
+      debugPrint('Stack trace: ${StackTrace.current}');
       // Fallback to zero values if Firestore fails
       return {
         'totalUsers': 0,
         'totalAgents': 0,
         'totalBookings': 0,
         'totalRevenue': 0.0,
+        'error': e.toString(),
       };
     }
+  }
+
+  // Helper pour créer une map d'erreur
+  Map<String, dynamic> _getErrorMap(String errorMessage) {
+    return {
+      'totalUsers': 0,
+      'totalAgents': 0,
+      'totalBookings': 0,
+      'totalRevenue': 0.0,
+      'error': errorMessage,
+    };
   }
 }
 

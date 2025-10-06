@@ -134,14 +134,54 @@ class _AgentsSearchScreenState extends State<AgentsSearchScreen> {
                             ),
                             const SizedBox(height: 12),
                             Text(a.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                            Text('Agent de sécurité', style: const TextStyle(color: AppColors.textSecondary)),
-                            const Spacer(),
+                            Text('Agent de sécurité', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                            const SizedBox(height: 4),
+                            Text(
+                              a.formattedMatricule,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.yellow,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
                             Row(
                               children: [
-                                const Icon(Icons.euro, size: 16, color: AppColors.success),
-                                Text(' ${a.hourlyRate.toStringAsFixed(2)}/h', style: const TextStyle(color: AppColors.success)),
-                                const Spacer(),
+                                Icon(Icons.cake, size: 12, color: AppColors.textSecondary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  a.formattedAge,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(Icons.person_outline, size: 12, color: AppColors.textSecondary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  a.formattedGender,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Spacer(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
                                 Icon(Icons.circle, size: 10, color: a.available ? AppColors.success : AppColors.danger),
+                                const SizedBox(width: 4),
+                                Text(
+                                  a.available ? 'Dispo' : 'Occupé',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: a.available ? AppColors.success : AppColors.danger,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                               ],
                             )
                           ],

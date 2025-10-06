@@ -1,6 +1,7 @@
 import '../models/agent_model.dart';
 import '../models/booking_model.dart';
 import '../models/user_unified.dart';
+import 'matricule_service.dart';
 
 class TempDataService {
   // Temporary mock agents for development
@@ -10,7 +11,13 @@ class TempDataService {
         id: 'agent_1',
         userId: 'user_1',
         name: 'Marcus Cole',
+        matricule: MatriculeService.generateMatriculeForAgent('Marcus Cole'),
         email: 'marcus.cole@example.com',
+        age: 38,
+        gender: 'Homme',
+        bloodGroup: 'O+',
+        educationLevel: 'Master',
+        antecedents: 'Aucun antécédent judiciaire',
         bio: 'Elite protection specialist with 15+ years of experience',
         experience: '15+ years in executive protection and security management',
         skills: ['Close Protection', 'Risk Assessment', 'Emergency Response', 'Defensive Driving'],
@@ -27,7 +34,13 @@ class TempDataService {
         id: 'agent_2',
         userId: 'user_2',
         name: 'Sofia Reyes',
+        matricule: MatriculeService.generateMatriculeForAgent('Sofia Reyes'),
         email: 'sofia.reyes@example.com',
+        age: 34,
+        gender: 'Femme',
+        bloodGroup: 'A+',
+        educationLevel: 'Licence',
+        antecedents: 'Aucun antécédent judiciaire',
         bio: 'Executive guard specializing in corporate security',
         experience: '12+ years in corporate and executive protection',
         skills: ['Executive Protection', 'Security Management', 'Surveillance', 'Crowd Control'],
@@ -44,7 +57,13 @@ class TempDataService {
         id: 'agent_3',
         userId: 'user_3',
         name: 'Leo Chen',
+        matricule: MatriculeService.generateMatriculeForAgent('Leo Chen'),
         email: 'leo.chen@example.com',
+        age: 42,
+        gender: 'Homme',
+        bloodGroup: 'B+',
+        educationLevel: 'Doctorat',
+        antecedents: 'Aucun antécédent judiciaire',
         bio: 'Corporate security expert with tactical background',
         experience: '10+ years in corporate security and risk assessment',
         skills: ['Risk Assessment', 'Crisis Management', 'Corporate Security', 'Threat Analysis'],

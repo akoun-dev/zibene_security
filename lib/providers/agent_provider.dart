@@ -60,14 +60,16 @@ class AgentProvider extends ChangeNotifier {
   Future<bool> createAgent({
     required String userId,
     required String name,
-    required String email,
-    String? phone,
+    required String matricule,
+    required int age,
+    required String gender,
+    required String bloodGroup,
+    required String educationLevel,
+    required String antecedents,
     String? avatarUrl,
     String bio = '',
     String experience = '',
     List<String> skills = const [],
-    List<String> certifications = const [],
-    double hourlyRate = 0.0,
     bool available = true,
   }) async {
     _isLoading = true;
@@ -75,19 +77,43 @@ class AgentProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      debugPrint('=== CREATE AGENT DEBUG ===');
+      debugPrint('userId: $userId');
+      debugPrint('name: $name');
+      debugPrint('bio: $bio');
+      debugPrint('experience: $experience');
+      debugPrint('skills: $skills');
+      debugPrint('available: $available');
+
+      // Vérifier l'utilisateur connecté
+      final currentUser = FirebaseService.auth.currentUser;
+      if (currentUser != null) {
+        debugPrint('Utilisateur Firebase connecté: ${currentUser.uid}');
+        debugPrint('Email: ${currentUser.email}');
+        debugPrint('Email vérifié: ${currentUser.emailVerified}');
+      } else {
+        debugPrint('AUCUN utilisateur Firebase connecté !');
+      }
+
       final agentId = userId; // Utiliser le même ID que l'utilisateur
       final agent = Agent(
         id: agentId,
         userId: userId,
         name: name,
-        email: email,
-        phone: phone,
+        matricule: matricule,
+        email: '', // Empty since email field is removed
+        age: age,
+        gender: gender,
+        bloodGroup: bloodGroup,
+        educationLevel: educationLevel,
+        antecedents: antecedents,
+        phone: '', // Empty since phone field is removed
         avatarUrl: avatarUrl,
         bio: bio,
         experience: experience,
         skills: skills,
-        certifications: certifications,
-        hourlyRate: hourlyRate,
+        certifications: [], // Empty since certifications field is removed
+        hourlyRate: 0.0, // Default value since hourlyRate field is removed
         available: available,
         isActive: true,
         isApproved: true,
@@ -95,16 +121,22 @@ class AgentProvider extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
 
+      debugPrint('Tentative d\'insertion dans la collection agents...');
+      debugPrint('Agent data: ${agent.toFirestore()}');
+
       await FirebaseService.insertData(
         FirebaseService.agentsCollection,
         agent.toFirestore(),
       );
 
+      debugPrint('Agent créé avec succès !');
       _agents.add(agent);
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
+      debugPrint('ERREUR lors de la création de l\'agent: $e');
+      debugPrint('Type d\'erreur: ${e.runtimeType}');
       _error = e.toString();
       _isLoading = false;
       notifyListeners();
@@ -116,13 +148,15 @@ class AgentProvider extends ChangeNotifier {
   Future<bool> updateAgent({
     required String agentId,
     String? name,
-    String? email,
-    String? phone,
+    String? matricule,
+    int? age,
+    String? gender,
+    String? bloodGroup,
+    String? educationLevel,
+    String? antecedents,
     String? bio,
     String? experience,
     List<String>? skills,
-    List<String>? certifications,
-    double? hourlyRate,
     bool? available,
     bool? isActive,
     bool? isApproved,
@@ -134,13 +168,15 @@ class AgentProvider extends ChangeNotifier {
     try {
       final updateData = <String, dynamic>{};
       if (name != null) updateData['name'] = name;
-      if (email != null) updateData['email'] = email;
-      if (phone != null) updateData['phone'] = phone;
+      if (matricule != null) updateData['matricule'] = matricule;
+      if (age != null) updateData['age'] = age;
+      if (gender != null) updateData['gender'] = gender;
+      if (bloodGroup != null) updateData['blood_group'] = bloodGroup;
+      if (educationLevel != null) updateData['education_level'] = educationLevel;
+      if (antecedents != null) updateData['antecedents'] = antecedents;
       if (bio != null) updateData['bio'] = bio;
       if (experience != null) updateData['experience'] = experience;
       if (skills != null) updateData['skills'] = skills;
-      if (certifications != null) updateData['certifications'] = certifications;
-      if (hourlyRate != null) updateData['hourly_rate'] = hourlyRate;
       if (available != null) updateData['available'] = available;
       if (isActive != null) updateData['is_active'] = isActive;
       if (isApproved != null) updateData['is_approved'] = isApproved;
@@ -157,13 +193,19 @@ class AgentProvider extends ChangeNotifier {
       if (index != -1) {
         _agents[index] = _agents[index].copyWith(
           name: name ?? _agents[index].name,
-          email: email ?? _agents[index].email,
-          phone: phone ?? _agents[index].phone,
+          matricule: matricule ?? _agents[index].matricule,
+          email: _agents[index].email, // Keep existing email
+          age: age ?? _agents[index].age,
+          gender: gender ?? _agents[index].gender,
+          bloodGroup: bloodGroup ?? _agents[index].bloodGroup,
+          educationLevel: educationLevel ?? _agents[index].educationLevel,
+          antecedents: antecedents ?? _agents[index].antecedents,
+          phone: _agents[index].phone, // Keep existing phone
           bio: bio ?? _agents[index].bio,
           experience: experience ?? _agents[index].experience,
           skills: skills ?? _agents[index].skills,
-          certifications: certifications ?? _agents[index].certifications,
-          hourlyRate: hourlyRate ?? _agents[index].hourlyRate,
+          certifications: _agents[index].certifications, // Keep existing certifications
+          hourlyRate: _agents[index].hourlyRate, // Keep existing hourly rate
           available: available ?? _agents[index].available,
           isActive: isActive ?? _agents[index].isActive,
           isApproved: isApproved ?? _agents[index].isApproved,
@@ -175,13 +217,19 @@ class AgentProvider extends ChangeNotifier {
       if (_selectedAgent?.id == agentId) {
         _selectedAgent = _selectedAgent!.copyWith(
           name: name ?? _selectedAgent!.name,
-          email: email ?? _selectedAgent!.email,
-          phone: phone ?? _selectedAgent!.phone,
+          matricule: matricule ?? _selectedAgent!.matricule,
+          email: _selectedAgent!.email, // Keep existing email
+          age: age ?? _selectedAgent!.age,
+          gender: gender ?? _selectedAgent!.gender,
+          bloodGroup: bloodGroup ?? _selectedAgent!.bloodGroup,
+          educationLevel: educationLevel ?? _selectedAgent!.educationLevel,
+          antecedents: antecedents ?? _selectedAgent!.antecedents,
+          phone: _selectedAgent!.phone, // Keep existing phone
           bio: bio ?? _selectedAgent!.bio,
           experience: experience ?? _selectedAgent!.experience,
           skills: skills ?? _selectedAgent!.skills,
-          certifications: certifications ?? _selectedAgent!.certifications,
-          hourlyRate: hourlyRate ?? _selectedAgent!.hourlyRate,
+          certifications: _selectedAgent!.certifications, // Keep existing certifications
+          hourlyRate: _selectedAgent!.hourlyRate, // Keep existing hourly rate
           available: available ?? _selectedAgent!.available,
           isActive: isActive ?? _selectedAgent!.isActive,
           isApproved: isApproved ?? _selectedAgent!.isApproved,
@@ -250,32 +298,13 @@ class AgentProvider extends ChangeNotifier {
     ).toList();
   }
 
-  // Get agents by hourly rate range
-  List<Agent> getAgentsByRateRange(double minRate, double maxRate) {
-    return _agents.where((agent) =>
-      agent.hourlyRate >= minRate && agent.hourlyRate <= maxRate
-    ).toList();
-  }
-
-  // Search agents by name or email
+  // Search agents by name or bio
   List<Agent> searchAgents(String query) {
     final lowercaseQuery = query.toLowerCase();
     return _agents.where((agent) =>
       agent.name.toLowerCase().contains(lowercaseQuery) ||
-      agent.email.toLowerCase().contains(lowercaseQuery) ||
       agent.bio.toLowerCase().contains(lowercaseQuery)
     ).toList();
-  }
-
-  // Sort agents by hourly rate
-  List<Agent> getAgentsSortedByRate({bool ascending = true}) {
-    final sorted = List<Agent>.from(_agents);
-    sorted.sort((a, b) {
-      final rateA = a.hourlyRate;
-      final rateB = b.hourlyRate;
-      return ascending ? rateA.compareTo(rateB) : rateB.compareTo(rateA);
-    });
-    return sorted;
   }
 
   // Set selected agent

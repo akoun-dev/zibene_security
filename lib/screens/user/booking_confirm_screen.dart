@@ -22,8 +22,6 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final hourlyRate = 50;
-    final totalCost = duration * hourlyRate;
 
     return Scaffold(
       appBar: AppBar(title: Text('book_security_agent'.t(context))),
@@ -76,11 +74,11 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                           ),
                           Row(
                             children: [
-                              const Icon(Icons.euro, color: AppColors.success, size: 16),
+                              const Icon(Icons.badge, color: AppColors.yellow, size: 16),
                               const SizedBox(width: 4),
                               Text(
-                                '${widget.agent.hourlyRate.toStringAsFixed(2)}/h',
-                                style: const TextStyle(fontSize: 14, color: AppColors.success),
+                                widget.agent.formattedMatricule,
+                                style: const TextStyle(fontSize: 14, color: AppColors.yellow, fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -253,37 +251,47 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(
+                      'Informations de réservation',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('hourly_rate'.t(context)),
-                        Text('\$$hourlyRate/${'hour'.t(context)}'),
+                        const Icon(Icons.schedule, color: AppColors.textSecondary, size: 18),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Durée estimée: $duration heures',
+                          style: const TextStyle(fontSize: 14),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('duration'.t(context)),
-                        Text('$duration ${'hours'.t(context)}'),
+                        const Icon(Icons.location_on, color: AppColors.textSecondary, size: 18),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            location.isNotEmpty ? location : 'Lieu à définir',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
                       ],
                     ),
-                    const Divider(),
+                    const SizedBox(height: 8),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'total_cost'.t(context),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        Text(
-                          '\$$totalCost',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: AppColors.yellow,
-                          ),
+                        const Icon(Icons.info_outline, color: AppColors.textSecondary, size: 18),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Cette demande sera envoyée à l\'agent pour confirmation',
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -305,7 +313,7 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                         ),
                       )
-                    : Text('confirm_booking'.t(context)),
+                    : Text('Envoyer la demande'),
               ),
             ),
             const SizedBox(height: 16),

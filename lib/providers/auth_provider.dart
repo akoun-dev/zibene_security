@@ -394,6 +394,35 @@ class FournisseurAuth extends ChangeNotifier {
   bool get isApproved => estApprouve;
   String get displayName => nomAffichage;
   String get userInitial => initialeUtilisateur;
+
+  // Vérifier les custom claims Firebase de l'utilisateur connecté
+  Future<Map<String, dynamic>?> getCustomClaims() async {
+    try {
+      if (_utilisateurActuel == null) {
+        debugPrint('Aucun utilisateur connecté pour vérifier les custom claims');
+        return null;
+      }
+
+      final user = FirebaseService.auth.currentUser;
+      if (user == null) {
+        debugPrint('Aucun utilisateur Firebase trouvé');
+        return null;
+      }
+
+      final idTokenResult = await user.getIdTokenResult();
+      final claims = idTokenResult.claims;
+
+      debugPrint('Custom claims de l\'utilisateur: $claims');
+      debugPrint('Role depuis custom claims: ${claims?['role']}');
+      debugPrint('UID utilisateur: ${user.uid}');
+      debugPrint('Email vérifié: ${user.emailVerified}');
+
+      return claims;
+    } catch (e) {
+      debugPrint('Erreur lors de la récupération des custom claims: $e');
+      return null;
+    }
+  }
 }
 
 // Classe alias pour la compatibilité avec le code existant

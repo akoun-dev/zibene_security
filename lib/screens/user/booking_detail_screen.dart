@@ -19,7 +19,7 @@ class BookingDetailScreen extends StatelessWidget {
             child: ListTile(
               leading: const CircleAvatar(child: Icon(Icons.person)),
               title: Text(booking.agent.name),
-              subtitle: Text('${booking.agent.hourlyRate.toStringAsFixed(2)}/h'),
+              subtitle: Text(booking.agent.formattedMatricule),
               trailing: _StatusChip(status: booking.status),
             ),
           ),
@@ -30,12 +30,12 @@ class BookingDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Horaire', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text('Détails de la réservation', style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   _Row('Début', booking.startTime.toString()),
                   _Row('Fin', booking.endTime.toString()),
                   _Row('Lieu', booking.location),
-                  _Row('Coût', '\$${booking.cost.toStringAsFixed(2)}', valueColor: AppColors.yellow),
+                  _Row('Service', booking.serviceType),
                 ],
               ),
             ),

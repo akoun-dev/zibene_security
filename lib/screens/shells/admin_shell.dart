@@ -11,6 +11,7 @@ import '../admin/system_monitor_screen.dart';
 import '../admin/roles_permissions_screen.dart';
 import '../admin/notifications_compose_screen.dart';
 import '../admin/activity_log_screen.dart';
+import '../admin/seed_management_screen.dart';
 
 class AdminShell extends StatefulWidget {
   const AdminShell({super.key});
@@ -83,6 +84,16 @@ class _AdminShellState extends State<AdminShell> {
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const ActivityLogScreen()),
                 ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.dataset),
+                title: Text('Gestion Seed'),
+                onTap: () {
+                  debugPrint('Navigation vers Gestion Seed...');
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SeedManagementScreen()),
+                  );
+                },
               ),
             ],
           ),

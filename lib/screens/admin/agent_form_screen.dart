@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/firebase_service.dart';
+import '../../services/matricule_service.dart';
 import '../../models/agent_model.dart';
 import '../../providers/agent_provider.dart';
 
@@ -14,17 +15,20 @@ class AgentFormScreen extends StatefulWidget {
 class _AgentFormScreenState extends State<AgentFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _bioController = TextEditingController();
   final _experienceController = TextEditingController();
-  final _certificationController = TextEditingController();
   final _skillController = TextEditingController();
-  final _hourlyRateController = TextEditingController();
+  String _matricule = '';
+
+  // Nouveaux champs
+  final _ageController = TextEditingController();
+  String _selectedGender = 'Homme';
+  String _selectedBloodGroup = 'A+';
+  String _selectedEducationLevel = 'Baccalauréat';
+  final _antecedentsController = TextEditingController();
 
   bool _available = true;
   bool _isLoading = false;
-  List<String> _certifications = [];
   List<String> _skills = [];
 
   @override
@@ -32,45 +36,34 @@ class _AgentFormScreenState extends State<AgentFormScreen> {
     super.initState();
     if (widget.agent != null) {
       _nameController.text = widget.agent!.name;
-      _emailController.text = widget.agent!.email;
-      _phoneController.text = widget.agent!.phone ?? '';
       _bioController.text = widget.agent!.bio;
       _experienceController.text = widget.agent!.experience;
-      _hourlyRateController.text = widget.agent!.hourlyRate.toString();
+      _matricule = widget.agent!.matricule;
+      _ageController.text = widget.agent!.age.toString();
+      _selectedGender = widget.agent!.gender;
+      _selectedBloodGroup = widget.agent!.bloodGroup;
+      _selectedEducationLevel = widget.agent!.educationLevel;
+      _antecedentsController.text = widget.agent!.antecedents;
       _available = widget.agent!.available;
-      _certifications = List.from(widget.agent!.certifications);
       _skills = List.from(widget.agent!.skills);
+    } else {
+      // Générer un matricule pour un nouvel agent
+      _matricule = MatriculeService.generateMatricule();
     }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
     _bioController.dispose();
     _experienceController.dispose();
-    _certificationController.dispose();
     _skillController.dispose();
-    _hourlyRateController.dispose();
+    _ageController.dispose();
+    _antecedentsController.dispose();
     super.dispose();
   }
 
-  void _addCertification() {
-    if (_certificationController.text.trim().isNotEmpty) {
-      setState(() {
-        _certifications.add(_certificationController.text.trim());
-        _certificationController.clear();
-      });
-    }
-  }
-
-  void _removeCertification(int index) {
-    setState(() {
-      _certifications.removeAt(index);
-    });
-  }
-
+  
   void _addSkill() {
     if (_skillController.text.trim().isNotEmpty) {
       setState(() {
@@ -102,17 +95,19 @@ class _AgentFormScreenState extends State<AgentFormScreen> {
 
         if (widget.agent == null) {
           // Create new agent document only (no Firebase Auth account)
-          final hourlyRate = double.tryParse(_hourlyRateController.text) ?? 0.0;
+          final age = int.tryParse(_ageController.text) ?? 0;
           await agentProvider.createAgent(
             userId: '', // Empty since no Firebase Auth account
             name: _nameController.text,
-            email: _emailController.text,
-            phone: _phoneController.text,
+            matricule: _matricule,
+            age: age,
+            gender: _selectedGender,
+            bloodGroup: _selectedBloodGroup,
+            educationLevel: _selectedEducationLevel,
+            antecedents: _antecedentsController.text,
             bio: _bioController.text,
             experience: _experienceController.text,
             skills: _skills,
-            certifications: _certifications,
-            hourlyRate: hourlyRate,
             available: _available,
           );
 
@@ -129,19 +124,21 @@ class _AgentFormScreenState extends State<AgentFormScreen> {
         } else {
           // Update existing agent
           final agentId = widget.agent!.id;
-          final hourlyRate = double.tryParse(_hourlyRateController.text) ?? widget.agent!.hourlyRate;
 
           // Update agent document only (no user document update)
+          final age = int.tryParse(_ageController.text) ?? widget.agent!.age;
           await agentProvider.updateAgent(
             agentId: agentId,
             name: _nameController.text,
-            email: _emailController.text,
-            phone: _phoneController.text,
+            matricule: _matricule,
+            age: age,
+            gender: _selectedGender,
+            bloodGroup: _selectedBloodGroup,
+            educationLevel: _selectedEducationLevel,
+            antecedents: _antecedentsController.text,
             bio: _bioController.text,
             experience: _experienceController.text,
             skills: _skills,
-            certifications: _certifications,
-            hourlyRate: hourlyRate,
             available: _available,
           );
 
@@ -190,41 +187,128 @@ class _AgentFormScreenState extends State<AgentFormScreen> {
               controller: _nameController,
               decoration: const InputDecoration(labelText: 'Nom complet *'),
               validator: (value) => value?.isEmpty ?? true ? 'Le nom est requis' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email *'),
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value?.isEmpty ?? true) return 'L\'email est requis';
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value!)) {
-                  return 'Email invalide';
+              onChanged: (value) {
+                // Régénérer le matricule si le nom change (pour les nouveaux agents)
+                if (widget.agent == null && value.isNotEmpty) {
+                  setState(() {
+                    _matricule = MatriculeService.generateMatriculeForAgent(value);
+                  });
                 }
-                return null;
               },
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _phoneController,
-              decoration: const InputDecoration(labelText: 'Téléphone *'),
-              keyboardType: TextInputType.phone,
-              validator: (value) => value?.isEmpty ?? true ? 'Le téléphone est requis' : null,
+              initialValue: MatriculeService.formatMatriculeForDisplay(_matricule),
+              decoration: const InputDecoration(
+                labelText: 'Matricule',
+                suffixIcon: Icon(Icons.badge, color: Colors.grey),
+                helperText: 'Généré automatiquement',
+              ),
+              enabled: false, // Lecture seule
+              style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _hourlyRateController,
-              decoration: const InputDecoration(labelText: 'Tarif horaire (€)'),
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              validator: (value) {
-                if (value?.isEmpty == true) return 'Le tarif horaire est requis';
-                if (double.tryParse(value!) == null) {
-                  return 'Tarif invalide';
-                }
-                return null;
+
+            // Informations personnelles
+            const Text(
+              'Informations personnelles',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _ageController,
+                    decoration: const InputDecoration(labelText: 'Âge *'),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value?.isEmpty ?? true) return 'L\'âge est requis';
+                      final age = int.tryParse(value!);
+                      if (age == null || age < 18 || age > 70) {
+                        return 'Âge invalide (18-70 ans)';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedGender,
+                    decoration: const InputDecoration(labelText: 'Genre *'),
+                    items: ['Homme', 'Femme'].map((String genre) {
+                      return DropdownMenuItem<String>(
+                        value: genre,
+                        child: Text(genre),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedGender = newValue!;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedBloodGroup,
+              decoration: const InputDecoration(labelText: 'Groupe sanguin *'),
+              items: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((String group) {
+                return DropdownMenuItem<String>(
+                  value: group,
+                  child: Text(group),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedBloodGroup = newValue!;
+                });
               },
             ),
             const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedEducationLevel,
+              decoration: const InputDecoration(labelText: 'Niveau d\'étude *'),
+              items: [
+                'Brevet',
+                'Baccalauréat',
+                'Licence',
+                'Master',
+                'Doctorat',
+                'Formation professionnelle',
+                'Autre'
+              ].map((String level) {
+                return DropdownMenuItem<String>(
+                  value: level,
+                  child: Text(level),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedEducationLevel = newValue!;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _antecedentsController,
+              decoration: const InputDecoration(
+                labelText: 'Antécédents judiciaires',
+                helperText: 'Précisez si l\'agent a des antécédents judiciaires',
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 24),
+
+            // Section professionnelle
+            const Text(
+              'Informations professionnelles',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _bioController,
               decoration: const InputDecoration(labelText: 'Biographie'),
@@ -275,43 +359,6 @@ class _AgentFormScreenState extends State<AgentFormScreen> {
                 return InputChip(
                   label: Text(skill),
                   onDeleted: () => _removeSkill(index),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Certifications',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _certificationController,
-                    decoration: const InputDecoration(
-                      hintText: 'Ajouter une certification',
-                      suffixIcon: Icon(Icons.add),
-                    ),
-                    onFieldSubmitted: (_) => _addCertification(),
-                  ),
-                ),
-                IconButton(
-                  onPressed: _addCertification,
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: _certifications.asMap().entries.map((entry) {
-                final index = entry.key;
-                final certification = entry.value;
-                return InputChip(
-                  label: Text(certification),
-                  onDeleted: () => _removeCertification(index),
                   deleteIcon: const Icon(Icons.close, size: 18),
                 );
               }).toList(),
