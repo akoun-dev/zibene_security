@@ -90,11 +90,11 @@ class _BookingsScreenState extends State<BookingsScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('my_bookings'.t(context)),
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'À venir'),
-              Tab(text: 'Terminées'),
-              Tab(text: 'Annulées'),
+              Tab(text: 'upcoming'.t(context)),
+              Tab(text: 'completed'.t(context)),
+              Tab(text: 'cancelled'.t(context)),
             ],
           ),
         ),
@@ -128,10 +128,10 @@ class _BookingList extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               status == 'upcoming'
-                  ? 'No upcoming bookings'
+                  ? 'no_upcoming_bookings'.t(context)
                   : status == 'completed'
-                      ? 'No completed bookings'
-                      : 'No cancelled bookings',
+                      ? 'no_completed_bookings'.t(context)
+                      : 'no_cancelled_bookings'.t(context),
               style: const TextStyle(
                 fontSize: 16,
                 color: AppColors.textSecondary,

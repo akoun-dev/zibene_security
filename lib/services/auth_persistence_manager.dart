@@ -58,22 +58,26 @@ class AuthPersistenceManager {
       final typeString = type.toString().split('.').last;
       await prefs.setString(_cleTypePersistance, typeString);
 
-      // Appliquer la persistance Firebase
-      Persistence firebasePersistence;
-      switch (type) {
-        case TypePersistance.local:
-          firebasePersistence = Persistence.LOCAL;
-          break;
-        case TypePersistance.session:
-          firebasePersistence = Persistence.SESSION;
-          break;
-        case TypePersistance.none:
-          firebasePersistence = Persistence.NONE;
-          break;
-      }
+      // Appliquer la persistance Firebase uniquement sur web
+      if (kIsWeb) {
+        Persistence firebasePersistence;
+        switch (type) {
+          case TypePersistance.local:
+            firebasePersistence = Persistence.LOCAL;
+            break;
+          case TypePersistance.session:
+            firebasePersistence = Persistence.SESSION;
+            break;
+          case TypePersistance.none:
+            firebasePersistence = Persistence.NONE;
+            break;
+        }
 
-      await _auth.setPersistence(firebasePersistence);
-      debugPrint('Type de persistance défini sur: $typeString');
+        await _auth.setPersistence(firebasePersistence);
+        debugPrint('Type de persistance Firebase défini sur: $typeString');
+      } else {
+        debugPrint('Type de persistance locale défini sur: $typeString (mobile)');
+      }
 
       return true;
     } catch (e) {

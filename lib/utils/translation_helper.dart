@@ -25,8 +25,8 @@ class TranslationHelper {
   static String tr(BuildContext context, String key) {
     // Essayer de trouver la clé dans toutes les catégories
     final categories = [
-      'auth', 'navigation', 'profile', 'booking', 'agent',
-      'help', 'payment', 'admin', 'status', 'about',
+      'auth', 'navigation', 'home', 'profile', 'booking', 'legal',
+      'agent', 'help', 'payment', 'admin', 'status', 'about',
       'notifications', 'adminComm', 'errors', 'success',
       'services', 'defaults', 'mockData'
     ];

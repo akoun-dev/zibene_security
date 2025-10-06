@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -319,6 +320,22 @@ class FirebaseService {
       await batch.commit();
     } catch (e) {
       throw Exception('Failed to execute batch operation: $e');
+    }
+  }
+
+  // Upload file to Firebase Storage
+  static Future<String> uploadFile(String path, File file) async {
+    try {
+      if (_storage == null) {
+        throw StateError('Firebase not initialized. Call initialize() first.');
+      }
+
+      final ref = _storage!.ref().child(path);
+      final uploadTask = await ref.putFile(file);
+      final downloadUrl = await uploadTask.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      throw Exception('Failed to upload file: $e');
     }
   }
 }

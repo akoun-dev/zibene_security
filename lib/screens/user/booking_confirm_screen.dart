@@ -58,7 +58,7 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                           ),
                         ),
                       ),
-                    const SizedBox(width: 16),
+                      const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,6 +89,7 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                     ),
                   ],
                 ),
+              ),
               ),
             ),
             const SizedBox(height: 24),
@@ -395,4 +396,3 @@ class _DateTimeSelector extends StatelessWidget {
     );
   }
 }
-

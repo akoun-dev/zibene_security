@@ -236,9 +236,26 @@ class ServiceAuthentification {
   // Ensure auth persistence is set
   Future<void> _ensureAuthPersistence() async {
     try {
-      await _auth.setPersistence(Persistence.LOCAL);
+      // Only set Firebase persistence on web platforms
+      if (kIsWeb) {
+        await _auth.setPersistence(Persistence.LOCAL);
+        debugPrint('Firebase Auth persistence set to LOCAL for web platform');
+      } else {
+        // On mobile platforms, use the AuthPersistenceManager
+        await _authPersistenceManager.definirTypePersistance(TypePersistance.local);
+        debugPrint('Auth persistence handled by AuthPersistenceManager for mobile platform');
+      }
     } catch (e) {
       debugPrint('Warning: Could not set auth persistence: $e');
+      // Fallback: try to set persistence to NONE
+      try {
+        if (kIsWeb) {
+          await _auth.setPersistence(Persistence.NONE);
+          debugPrint('Firebase Auth persistence set to NONE as fallback');
+        }
+      } catch (fallbackError) {
+        debugPrint('Failed to set fallback persistence: $fallbackError');
+      }
     }
   }
 

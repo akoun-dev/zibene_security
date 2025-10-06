@@ -5,11 +5,13 @@ import '../../utils/translation_helper.dart';
 import '../../models/user_unified.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/booking_provider.dart';
+import '../../providers/auth_provider.dart';
 import 'payment_methods_screen.dart';
 import 'help_support_screen.dart';
 import 'notifications_settings_screen.dart';
 import 'about_screen.dart';
 import 'legal_terms_screen.dart';
+import 'profile_update_screen.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
@@ -33,7 +35,7 @@ class UserProfileScreen extends StatelessWidget {
     final userStats = {
       'total_bookings': userBookings.length,
       'completed_bookings': userBookings.where((b) => b.status.toString() == 'completed').length,
-      'total_spent': '\$${userBookings.fold(0.0, (sum, booking) => sum + booking.cost).toStringAsFixed(2)}',
+      'total_spent': '${'currency_symbol'.t(context)}${userBookings.fold(0.0, (sum, booking) => sum + booking.cost).toStringAsFixed(2)}',
       'member_since': user.memberSince,
     };
 
@@ -91,18 +93,27 @@ class UserProfileScreen extends StatelessWidget {
                         Positioned(
                           bottom: 0,
                           right: 0,
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: AppColors.success,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.cardDark, width: 3),
-                            ),
-                            child: const Icon(
-                              Icons.edit,
-                              color: Colors.white,
-                              size: 16,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const ProfileUpdateScreen(),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: AppColors.success,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppColors.cardDark, width: 3),
+                              ),
+                              child: const Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                                size: 16,
+                              ),
                             ),
                           ),
                         ),
@@ -116,108 +127,11 @@ class UserProfileScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      user.role == UserRole.admin ? 'administrator'.t(context) : 'premium_member'.t(context),
-                      style: TextStyle(
-                        color: AppColors.yellow,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _StatColumn(
-                          value: userStats['total_bookings'].toString(),
-                          label: 'bookings'.t(context),
-                        ),
-                        _StatColumn(
-                          value: userStats['completed_bookings'].toString(),
-                          label: 'completed'.t(context),
-                        ),
-                        _StatColumn(
-                          value: userStats['total_spent'].toString(),
-                          label: 'spent'.t(context),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            _SectionTitle('personal_information'.t(context)),
-            Card(
-              child: Column(
-                children: [
-                  _Tile(icon: Icons.email_outlined, title: 'email'.t(context), value: user.email),
-                  if (user.phone != null) ...[
-                    const Divider(height: 1),
-                    _Tile(icon: Icons.phone_outlined, title: 'phone'.t(context), value: user.phone!),
-                  ],
-                  if (user.address != null) ...[
-                    const Divider(height: 1),
-                    _Tile(icon: Icons.location_on_outlined, title: 'address'.t(context), value: user.address!),
-                  ],
-                  const Divider(height: 1),
-                  _Tile(icon: Icons.lock_outline, title: 'password'.t(context), value: '••••••••'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            _SectionTitle('quick_actions'.t(context)),
-            Row(
-              children: [
-                Expanded(
-                  child: _QuickActionCard(
-                    icon: Icons.history,
-                    title: 'booking_history'.t(context),
-                    color: AppColors.info,
-                    onTap: () {},
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _QuickActionCard(
-                    icon: Icons.star,
-                    title: 'reviews'.t(context),
-                    color: AppColors.yellow,
-                    onTap: () {},
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            _SectionTitle('settings_preferences'.t(context)),
-            Card(
-              child: Column(children: [
-                ListTile(
-                  leading: const Icon(Icons.notifications_active_outlined, color: AppColors.yellow),
-                  title: Text('notifications'.t(context)),
-                  subtitle: Text('manage_notification_preferences'.t(context)),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const NotificationsSettingsScreen()),
-                  ),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.credit_card, color: AppColors.yellow),
-                  title: Text('payment_methods'.t(context)),
-                  subtitle: Text('manage_your_payment_options'.t(context)),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const PaymentMethodsScreen()),
-                  ),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.security_outlined, color: AppColors.yellow),
-                  title: Text('security'.t(context)),
-                  subtitle: Text('two_factor_authentication_password'.t(context)),
-                  onTap: () {},
-                ),
-              ]),
-            ),
+
             const SizedBox(height: 24),
             _SectionTitle('support_legal'.t(context)),
             Card(
@@ -253,6 +167,14 @@ class UserProfileScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (_) => const PrivacyScreen()),
                   ),
                 ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.cookie_outlined, color: AppColors.yellow),
+                  title: Text('cookie_policy'.t(context)),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const CookieScreen()),
+                  ),
+                ),
               ]),
             ),
             const SizedBox(height: 24),
@@ -267,7 +189,46 @@ class UserProfileScreen extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: () {},
+                onPressed: () {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: Text(
+          'sign_out'.t(context),
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'sign_out_confirmation'.t(context),
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'cancel'.t(context),
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Implémenter la déconnexion ici
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              authProvider.signOut();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('sign_out_confirm'.t(context)),
+          ),
+        ],
+      );
+    },
+  );
+},
                 child: Text('sign_out'.t(context)),
               ),
             ),
