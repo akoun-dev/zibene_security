@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "267745445625",
+    "project_id": "zibene-47b89",
+    "storage_bucket": "zibene-47b89.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:267745445625:android:e332c67fa087dfd7784428",
+        "android_client_info": {
+          "package_name": "com.zibene.security"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnbpSikIVMi4VXDyGI7q7IcM6EAPeij4k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

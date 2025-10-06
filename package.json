@@ -1,0 +1,19 @@
+{
+  "name": "zibene_security",
+  "version": "1.0.0",
+  "description": "Application mobile Flutter pour la réservation de gardes du corps certifiés",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "flutter",
+    "firebase",
+    "security",
+    "mobile-app",
+    "bodyguard"
+  ],
+  "author": "ZIBENE SECURITY",
+  "license": "MIT",
+  "dependencies": {}
+}

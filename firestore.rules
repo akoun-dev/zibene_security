@@ -1,0 +1,121 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Admin check using custom claims
+    function isAdmin() {
+      return isAuthenticated() &&
+             request.auth.token.role == 'admin';
+    }
+
+    // Client check using custom claims
+    function isClient() {
+      return isAuthenticated() &&
+             request.auth.token.role == 'client';
+    }
+
+    // Users collection rules (only clients and admins)
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create: if isAdmin(); // Only admins can create users
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Agents collection rules (separate from users)
+    match /agents/{agentId} {
+      allow read: if true; // Anyone can view agent profiles (public browsing)
+      allow create: if isAdmin(); // Only admins can create agents
+      allow update: if isAdmin(); // Only admins can update agents
+      allow delete: if isAdmin(); // Only admins can delete agents
+    }
+
+    // Bookings collection rules
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated() &&
+                     (resource.data.client_id == request.auth.uid ||
+                      isAdmin());
+      allow create: if isClient(); // Only clients can create bookings
+      allow update: if isAuthenticated() &&
+                     (resource.data.client_id == request.auth.uid ||
+                      isAdmin());
+      allow delete: if isAdmin() ||
+                     (resource.data.client_id == request.auth.uid &&
+                      resource.data.status == 'pending');
+    }
+
+    // Payments collection rules
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() &&
+                     (resource.data.user_id == request.auth.uid ||
+                      isAdmin());
+      allow create: if isAuthenticated() &&
+                     (resource.data.user_id == request.auth.uid ||
+                      isAdmin());
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Notifications collection rules
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() &&
+                     resource.data.user_id == request.auth.uid;
+      allow create: if isAuthenticated() &&
+                     resource.data.user_id == request.auth.uid;
+      allow update: if isAuthenticated() &&
+                     resource.data.user_id == request.auth.uid;
+      allow delete: if isAuthenticated() &&
+                     resource.data.user_id == request.auth.uid;
+    }
+
+    // Reviews collection rules
+    match /reviews/{reviewId} {
+      allow read: if true; // Anyone can read reviews (public)
+      allow create: if isClient() &&
+                     resource.data.client_id == request.auth.uid;
+      allow update: if isAuthenticated() &&
+                     resource.data.client_id == request.auth.uid;
+      allow delete: if isAdmin() ||
+                     (resource.data.client_id == request.auth.uid &&
+                      request.time < resource.data.created_at + value.duration(24, 'h'));
+    }
+
+    // Query rules for performance and security
+    match /users/{userId} {
+      allow list: if isAdmin(); // Only admins can list users
+    }
+
+    match /agents/{agentId} {
+      allow list: if true; // Allow searching agents (public browsing)
+    }
+
+    match /bookings/{bookingId} {
+      allow list: if isAuthenticated(); // Users can list their own bookings
+    }
+
+    match /payments/{paymentId} {
+      allow list: if isAuthenticated(); // Users can list their payments
+    }
+
+    match /notifications/{notificationId} {
+      allow list: if isAuthenticated(); // Users can list their notifications
+    }
+
+    match /reviews/{reviewId} {
+      allow list: if true; // Allow browsing reviews (public)
+    }
+  }
+}
