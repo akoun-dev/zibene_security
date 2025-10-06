@@ -129,6 +129,13 @@ class AppTranslations {
     'sign_out_confirm': 'Se déconnecter',
     'cancel': 'Annuler',
 
+    // App Exit Confirmation
+    'exit_app_confirmation': 'Êtes-vous sûr de vouloir quitter l\'application ?',
+    'exit_app_title': 'Quitter l\'application',
+    'exit_app_confirm': 'Quitter',
+    'exit_app_message': 'Toutes vos données non sauvegardées seront perdues.',
+    'app_exit_double_tap': 'Appuyez à nouveau pour quitter',
+
     // Profile Update
     'edit_profile': 'Modifier le profil',
     'update_profile': 'Mettre à jour le profil',
