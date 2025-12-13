@@ -249,7 +249,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
 
               // Status
               DropdownButtonFormField<BookingStatus>(
-                value: _status,
+                initialValue: _status,
                 decoration: const InputDecoration(
                   labelText: 'Statut',
                   border: OutlineInputBorder(),

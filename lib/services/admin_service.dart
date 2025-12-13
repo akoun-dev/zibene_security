@@ -57,7 +57,7 @@ class AdminService {
         );
 
         if (userDoc != null) {
-          final userData = userDoc as Map<String, dynamic>;
+          final userData = userDoc;
           final roleFromDb = userData['role'];
           debugPrint('AdminService: Role from database: $roleFromDb');
 

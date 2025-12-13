@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/main_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../providers/agent_provider.dart';
 import '../../providers/booking_provider.dart';
 import '../../models/booking_model.dart';
+import '../../models/user_unified.dart';
 import '../../utils/theme.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -38,20 +38,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       // Get additional stats from providers
       if (!mounted) return;
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final agentProvider = Provider.of<AgentProvider>(context, listen: false);
       final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
 
-      // Load agents data
-      await agentProvider.fetchAgents();
+      // Load all users data
+      await userProvider.fetchUsers();
 
       // Load all bookings for admin view
-      await bookingProvider.fetchUserBookings('admin', 'admin');
+      await bookingProvider.fetchUserBookings('admin_view', 'admin');
+
+      final activeUsers = userProvider.users.where((u) => u.isActive).length;
+      final clientUsers = userProvider.getUsersByRole(UserRole.client).length;
 
       if (mounted) {
         setState(() {
           _systemStats = {
             ...stats,
-            'activeAgents': agentProvider.availableAgents.length,
+            'activeAgents': clientUsers, // Renamed for compatibility
             'pendingBookings': bookingProvider.pendingBookings.length,
           };
           _isLoading = false;
@@ -76,7 +78,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildRecentActivity() {
-    final agentProvider = Provider.of<AgentProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
 
     List<Widget> activityItems = [];
@@ -101,17 +103,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       );
     }
 
-    // Add recent agents
-    if (agentProvider.agents.isNotEmpty) {
+    // Add recent users
+    if (userProvider.users.isNotEmpty) {
       activityItems.addAll(
-        agentProvider.agents.take(2).map((agent) => Card(
+        userProvider.users.take(2).map((user) => Card(
           child: ListTile(
             leading: const Icon(Icons.person_add, color: AppColors.yellow),
-            title: Text('Nouvel agent enregistré'),
-            subtitle: Text(agent.name),
+            title: Text('Nouvel utilisateur inscrit'),
+            subtitle: Text('${user.name} - ${user.role.name}'),
             trailing: Icon(
-              agent.available ? Icons.check_circle : Icons.cancel,
-              color: agent.available ? AppColors.success : AppColors.danger,
+              user.isActive ? Icons.check_circle : Icons.cancel,
+              color: user.isActive ? AppColors.success : AppColors.danger,
             ),
           ),
         )),

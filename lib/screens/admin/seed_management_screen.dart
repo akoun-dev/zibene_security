@@ -50,13 +50,13 @@ class _SeedManagementScreenState extends State<SeedManagementScreen> {
     });
 
     try {
-      final success = await SeedService.seedAgents();
+      final success = await SeedService.seedTestUsers();
 
       if (success) {
-        _operationResult = 'Agents créés avec succès !';
+        _operationResult = 'Utilisateurs de test créés avec succès !';
         await _checkDataStatus(); // Rafraîchir les stats
       } else {
-        _operationResult = 'Erreur lors de la création des agents';
+        _operationResult = 'Erreur lors de la création des utilisateurs de test';
       }
     } catch (e) {
       _operationResult = 'Erreur: $e';
@@ -74,13 +74,13 @@ class _SeedManagementScreenState extends State<SeedManagementScreen> {
     });
 
     try {
-      final success = await SeedService.seedAgentProfiles();
+      final success = await SeedService.seedTestBookings();
 
       if (success) {
-        _operationResult = 'Profils créés avec succès !';
+        _operationResult = 'Réservations de test créées avec succès !';
         await _checkDataStatus(); // Rafraîchir les stats
       } else {
-        _operationResult = 'Erreur lors de la création des profils';
+        _operationResult = 'Erreur lors de la création des réservations de test';
       }
     } catch (e) {
       _operationResult = 'Erreur: $e';

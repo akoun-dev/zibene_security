@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/firebase_service.dart';
-import '../services/admin_service.dart';
 import 'auth_provider.dart';
 import 'booking_provider.dart';
 import 'user_provider.dart';
 import 'notification_provider.dart';
 import 'payment_provider.dart';
 import 'location_provider.dart';
-import 'agent_provider.dart';
 
 class MainProvider extends ChangeNotifier {
   final AuthProvider authProvider;
@@ -17,7 +15,6 @@ class MainProvider extends ChangeNotifier {
   final NotificationProvider notificationProvider;
   final PaymentProvider paymentProvider;
   final LocationProvider locationProvider;
-  final AgentProvider agentProvider;
 
   MainProvider({
     required this.authProvider,
@@ -26,7 +23,6 @@ class MainProvider extends ChangeNotifier {
     required this.notificationProvider,
     required this.paymentProvider,
     required this.locationProvider,
-    required this.agentProvider,
   });
 
   // Initialize all providers
@@ -47,11 +43,6 @@ class MainProvider extends ChangeNotifier {
 
           // Initialize current user in user provider
           await userProvider.refreshUser();
-
-          // If user is admin, also initialize agents
-          if (user.role.name == 'admin') {
-            await agentProvider.fetchAgents();
-          }
         }
       }
     } catch (e) {
@@ -64,7 +55,6 @@ class MainProvider extends ChangeNotifier {
   void clearAllData() {
     authProvider.signOut();
     bookingProvider.clearBookings();
-    agentProvider.clearAgents();
     userProvider.clearUser();
     notificationProvider.clearNotifications();
     paymentProvider.clearPayments();
@@ -93,25 +83,9 @@ class MainProvider extends ChangeNotifier {
       final totalUsers = usersSnapshot.docs.length;
       debugPrint('Users count: $totalUsers');
 
-      // Get agents count
+      // Since we removed agent role, totalAgents will be 0
       int totalAgents = 0;
-      try {
-        debugPrint('Tentative de lecture de la collection agents...');
-        final agentsSnapshot = await FirebaseService.agentsCollection.get();
-        totalAgents = agentsSnapshot.docs.length;
-        debugPrint('SUCCESS: Agents count: $totalAgents');
-      } catch (e) {
-        debugPrint('ERROR getting agents count: $e');
-        debugPrint('Fallback: Counting agents from users collection...');
-        // Agents collection might not exist yet, count from users with agent role
-        totalAgents = usersSnapshot.docs
-            .where((doc) {
-              final data = doc.data() as Map<String, dynamic>?;
-              return data?['role'] == 'agent';
-            })
-            .length;
-        debugPrint('Fallback: Agents count from users: $totalAgents');
-      }
+      debugPrint('Agent functionality has been removed');
 
       // Get bookings count
       int totalBookings = 0;
@@ -195,7 +169,6 @@ class AppProviders extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
         ChangeNotifierProvider(create: (_) => PaymentProvider()),
         ChangeNotifierProvider(create: (_) => LocationProvider()),
-        ChangeNotifierProvider(create: (_) => AgentProvider()),
         ChangeNotifierProvider(
           create: (context) => MainProvider(
             authProvider: context.read<AuthProvider>(),
@@ -204,7 +177,6 @@ class AppProviders extends StatelessWidget {
             notificationProvider: context.read<NotificationProvider>(),
             paymentProvider: context.read<PaymentProvider>(),
             locationProvider: context.read<LocationProvider>(),
-            agentProvider: context.read<AgentProvider>(),
           ),
         ),
       ],

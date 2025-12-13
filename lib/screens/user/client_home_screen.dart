@@ -4,10 +4,9 @@ import '../../utils/theme.dart';
 import '../../utils/translation_helper.dart';
 import '../../utils/responsive_utils.dart';
 import '../../providers/user_provider.dart';
-import '../../providers/agent_provider.dart';
 import '../../providers/booking_provider.dart';
-import 'agents_search_screen.dart';
 import 'bookings_screen.dart';
+import 'booking_form_screen.dart';
 
 class ClientHomeScreen extends StatelessWidget {
   const ClientHomeScreen({super.key});
@@ -15,9 +14,56 @@ class ClientHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final agentProvider = Provider.of<AgentProvider>(context);
     final bookingProvider = Provider.of<BookingProvider>(context);
     final user = userProvider.currentUser;
+
+    if (userProvider.isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (userProvider.error != null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: AppColors.danger,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Erreur de chargement',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.danger,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                userProvider.error!,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => userProvider.refreshUser(),
+                child: const Text('Réessayer'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     if (user == null) {
       return const Scaffold(
@@ -109,10 +155,13 @@ class ClientHomeScreen extends StatelessWidget {
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const AgentsSearchScreen()),
-                        ),
-                        child: Text('book_now'.t(context)),
+                        onPressed: () {
+                          // Redirection vers la page de création de réservation
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const BookingFormScreen()),
+                          );
+                        },
+                        child: Text('Réserver un service'),
                       ),
                     ),
                   ),
@@ -133,7 +182,7 @@ class ClientHomeScreen extends StatelessWidget {
               label: 'Statistiques rapides',
               child: Row(
                 children: [
-                  Expanded(child: _StatCard(title: 'active_agents'.t(context), value: agentProvider.availableAgents.length.toString(), trend: '+5%', semanticLabel: 'Agents actifs')),
+                  Expanded(child: _StatCard(title: 'active_users'.t(context), value: '0', trend: '+5%', semanticLabel: 'Utilisateurs actifs')),
                   SizedBox(width: ResponsiveUtils.getResponsiveSpacing(context)),
                   Expanded(child: _StatCard(title: 'upcoming'.t(context), value: bookingProvider.bookings.where((b) => b.clientId == user.id).length.toString(), trend: '+2%', semanticLabel: 'Réservations à venir')),
                 ],
@@ -155,11 +204,11 @@ class ClientHomeScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _ActionButton(
-                      icon: Icons.shield_outlined,
-                      label: 'find_agents'.t(context),
-                      semanticLabel: 'Trouver des agents',
+                      icon: Icons.calendar_today,
+                      label: 'view_bookings'.t(context),
+                      semanticLabel: 'Voir mes réservations',
                       onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const AgentsSearchScreen()),
+                        MaterialPageRoute(builder: (_) => const BookingsScreen()),
                       ),
                     ),
                   ),

@@ -80,7 +80,6 @@ class FirebaseService {
 
   // Collection references
   static CollectionReference get usersCollection => firestore.collection('users');
-  static CollectionReference get agentsCollection => firestore.collection('agents');
   static CollectionReference get agentProfilesCollection => firestore.collection('agent_profiles');
   static CollectionReference get bookingsCollection => firestore.collection('bookings');
   static CollectionReference get paymentsCollection => firestore.collection('payments');

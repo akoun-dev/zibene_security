@@ -16,7 +16,6 @@ class BookingModel {
   final DateTime updatedAt;
   final String? cancellationReason;
   final User? client;
-  final User? agent;
 
   BookingModel({
     required this.id,
@@ -33,7 +32,6 @@ class BookingModel {
     this.notes,
     this.cancellationReason,
     this.client,
-    this.agent,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
@@ -55,7 +53,6 @@ class BookingModel {
       updatedAt: FirestoreUtils.toDateTime(json['updated_at']) ?? DateTime.now(),
       cancellationReason: json['cancellation_reason'],
       client: json['client'] != null ? User.fromFirestore(json['client']) : null,
-      agent: json['agent'] != null ? User.fromFirestore(json['agent']) : null,
     );
   }
 
@@ -75,7 +72,6 @@ class BookingModel {
       'updated_at': updatedAt.toIso8601String(),
       'cancellation_reason': cancellationReason,
       'client': client?.toFirestore(),
-      'agent': agent?.toFirestore(),
     };
   }
 
@@ -94,7 +90,6 @@ class BookingModel {
     DateTime? updatedAt,
     String? cancellationReason,
     User? client,
-    User? agent,
   }) {
     return BookingModel(
       id: id ?? this.id,
@@ -111,7 +106,6 @@ class BookingModel {
       updatedAt: updatedAt ?? this.updatedAt,
       cancellationReason: cancellationReason ?? this.cancellationReason,
       client: client ?? this.client,
-      agent: agent ?? this.agent,
     );
   }
 

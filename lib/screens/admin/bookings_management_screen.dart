@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../models/booking_model.dart';
 import '../../providers/booking_provider.dart';
 import '../../utils/theme.dart';
@@ -14,6 +13,7 @@ class BookingsManagementScreen extends StatefulWidget {
 class _BookingsManagementScreenState extends State<BookingsManagementScreen> {
   final BookingProvider _bookingProvider = BookingProvider();
   String _selectedStatus = 'all';
+  String _searchQuery = '';
   bool _isLoading = false;
 
   Color _getStatusColor(BookingStatus status) {
@@ -30,8 +30,6 @@ class _BookingsManagementScreenState extends State<BookingsManagementScreen> {
         return Colors.red;
       case BookingStatus.rejected:
         return Colors.grey;
-      default:
-        return Colors.grey;
     }
   }
 
@@ -47,14 +45,16 @@ class _BookingsManagementScreenState extends State<BookingsManagementScreen> {
     });
 
     try {
-      await _bookingProvider.fetchUserBookings('admin', 'admin');
+      await _bookingProvider.fetchUserBookings('admin_view', 'admin');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur lors du chargement des réservations: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors du chargement des réservations: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -66,10 +66,27 @@ class _BookingsManagementScreenState extends State<BookingsManagementScreen> {
 
   List<BookingModel> get _filteredBookings {
     final bookings = _bookingProvider.bookings;
-    if (_selectedStatus == 'all') {
-      return bookings;
+    var filtered = bookings;
+
+    // Filter by status
+    if (_selectedStatus != 'all') {
+      filtered = filtered.where((b) => b.status.toString() == _selectedStatus).toList();
     }
-    return bookings.where((b) => b.status.toString() == _selectedStatus).toList();
+
+    // Filter by search query
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((b) {
+        final clientName = b.client?.name?.toLowerCase() ?? '';
+        final serviceType = b.serviceType.toLowerCase();
+        final location = b.location.toLowerCase();
+
+        return clientName.contains(_searchQuery) ||
+               serviceType.contains(_searchQuery) ||
+               location.contains(_searchQuery);
+      }).toList();
+    }
+
+    return filtered;
   }
 
   @override
@@ -95,7 +112,9 @@ class _BookingsManagementScreenState extends State<BookingsManagementScreen> {
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (value) {
-                // TODO: Implement search
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
               },
             ),
             const SizedBox(height: 12),
@@ -163,7 +182,7 @@ class _BookingsManagementScreenState extends State<BookingsManagementScreen> {
                                       color: _getStatusColor(booking.status),
                                     ),
                                   ),
-                                  title: Text('${booking.client?.name ?? 'Client'} - ${booking.agent?.name ?? 'Agent'}'),
+                                  title: Text('${booking.client?.name ?? 'Client'} - ${booking.serviceType}'),
                                   subtitle: Text('${booking.serviceType} - ${booking.location}'),
                                   trailing: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -181,7 +200,14 @@ class _BookingsManagementScreenState extends State<BookingsManagementScreen> {
                                     ),
                                   ),
                                   onTap: () {
-                                    // TODO: Navigate to booking details
+                                    if (booking.id.isNotEmpty) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Détails de la réservation ${booking.id}'),
+                                          duration: const Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
                                   },
                                 ),
                               );
@@ -209,8 +235,6 @@ class _BookingsManagementScreenState extends State<BookingsManagementScreen> {
         return Icons.cancel;
       case BookingStatus.rejected:
         return Icons.block;
-      default:
-        return Icons.help;
     }
   }
 }

@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../utils/theme.dart';
 import '../../utils/translation_helper.dart';
-import '../../models/user_unified.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/booking_provider.dart';
 import '../../providers/auth_provider.dart';
-import 'payment_methods_screen.dart';
 import 'help_support_screen.dart';
-import 'notifications_settings_screen.dart';
 import 'about_screen.dart';
 import 'legal_terms_screen.dart';
 import 'profile_update_screen.dart';
@@ -36,7 +33,9 @@ class UserProfileScreen extends StatelessWidget {
       'total_bookings': userBookings.length,
       'completed_bookings': userBookings.where((b) => b.status.toString() == 'completed').length,
       'total_spent': '${'currency_symbol'.t(context)}${userBookings.fold(0.0, (sum, booking) => sum + booking.cost).toStringAsFixed(2)}',
-      'member_since': user.memberSince,
+      'member_since': user.createdAt != null
+          ? '${DateTime.now().difference(user.createdAt!).inDays ~/ 30} mois'
+          : 'Inconnu',
     };
 
     return Scaffold(

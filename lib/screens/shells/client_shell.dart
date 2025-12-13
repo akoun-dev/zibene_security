@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import '../../utils/theme.dart';
 import '../../utils/translation_helper.dart';
 import '../user/client_home_screen.dart';
-import '../user/agents_search_screen.dart';
+import '../user/agents_list_screen.dart';
 import '../user/bookings_screen.dart';
+import '../user/booking_form_screen.dart';
 import '../user/profile_screen.dart';
 
 class ClientShell extends StatefulWidget {
@@ -92,7 +93,7 @@ class _ClientShellState extends State<ClientShell> {
   Widget build(BuildContext context) {
     final pages = [
       const ClientHomeScreen(),
-      const AgentsSearchScreen(),
+      const AgentsListScreen(),
       const BookingsScreen(),
       const UserProfileScreen(),
     ];
@@ -115,10 +116,11 @@ class _ClientShellState extends State<ClientShell> {
           onDestinationSelected: (i) => setState(() => index = i),
           destinations: [
             NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: 'home'.t(context)),
-            NavigationDestination(icon: const Icon(Icons.shield_outlined), selectedIcon: const Icon(Icons.shield), label: 'agents'.t(context)),
+            NavigationDestination(icon: const Icon(Icons.people_alt_outlined), selectedIcon: const Icon(Icons.people_alt), label: 'Agents'),
             NavigationDestination(icon: const Icon(Icons.bookmark_border), selectedIcon: const Icon(Icons.bookmark), label: 'bookings'.t(context)),
             NavigationDestination(icon: const Icon(Icons.person_outline), selectedIcon: const Icon(Icons.person), label: 'profile'.t(context)),
           ],
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
         ),
       ),
     );

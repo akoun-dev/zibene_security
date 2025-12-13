@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'firebase_service.dart';
-import '../data/agent_seed_data.dart';
 
 class SeedService {
   static bool _isSeeding = false;
@@ -15,20 +14,20 @@ class SeedService {
 
       debugPrint('SeedService: Vérification des données existantes...');
 
-      // Vérifier si des agents existent déjà
-      final agentsSnapshot = await FirebaseService.agentsCollection.get();
-      final hasAgents = agentsSnapshot.docs.isNotEmpty;
+      // Vérifier si des utilisateurs existent déjà
+      final usersSnapshot = await FirebaseService.usersCollection.get();
+      final hasUsers = usersSnapshot.docs.isNotEmpty;
 
-      debugPrint('SeedService: Agents existants: $hasAgents (${agentsSnapshot.docs.length})');
-      return hasAgents;
+      debugPrint('SeedService: Utilisateurs existants: $hasUsers (${usersSnapshot.docs.length})');
+      return hasUsers;
     } catch (e) {
       debugPrint('SeedService: Erreur lors de la vérification des données: $e');
       return false;
     }
   }
 
-  // Insérer les données seed des agents
-  static Future<bool> seedAgents() async {
+  // Insérer les données seed des utilisateurs de test
+  static Future<bool> seedTestUsers() async {
     if (_isSeeding) {
       debugPrint('SeedService: Seed déjà en cours...');
       return false;
@@ -40,30 +39,54 @@ class SeedService {
     }
 
     _isSeeding = true;
-    debugPrint('=== DÉBUT SEED AGENTS ===');
+    debugPrint('=== DÉBUT SEED UTILISATEURS ===');
 
     try {
-      final agents = AgentSeedData.getAgents();
-      debugPrint('SeedService: Insertion de ${agents.length} agents...');
+      final testUsers = [
+        {
+          'id': 'test_client_1',
+          'full_name': 'John Doe',
+          'email': 'john.doe@test.com',
+          'phone': '+1234567890',
+          'role': 'client',
+          'is_active': true,
+          'is_approved': true,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        {
+          'id': 'test_admin_1',
+          'full_name': 'Admin User',
+          'email': 'admin@test.com',
+          'phone': '+0987654321',
+          'role': 'admin',
+          'is_active': true,
+          'is_approved': true,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+      ];
+
+      debugPrint('SeedService: Insertion de ${testUsers.length} utilisateurs...');
 
       int successCount = 0;
       int errorCount = 0;
 
-      for (final agentData in agents) {
+      for (final userData in testUsers) {
         try {
           await FirebaseService.insertData(
-            FirebaseService.agentsCollection,
-            agentData,
+            FirebaseService.usersCollection,
+            userData,
           );
           successCount++;
-          debugPrint('SeedService: Agent ${agentData['name']} créé avec succès');
+          debugPrint('SeedService: Utilisateur ${userData['full_name']} créé avec succès');
         } catch (e) {
           errorCount++;
-          debugPrint('SeedService: Erreur création agent ${agentData['name']}: $e');
+          debugPrint('SeedService: Erreur création utilisateur ${userData['full_name']}: $e');
         }
       }
 
-      debugPrint('=== FIN SEED AGENTS ===');
+      debugPrint('=== FIN SEED UTILISATEURS ===');
       debugPrint('SeedService: Succès: $successCount, Erreurs: $errorCount');
 
       _isSeeding = false;
@@ -75,43 +98,70 @@ class SeedService {
     }
   }
 
-  // Insérer les profils détaillés des agents
-  static Future<bool> seedAgentProfiles() async {
+  // Insérer des données de test pour les réservations
+  static Future<bool> seedTestBookings() async {
     if (!FirebaseService.isInitialized) {
-      debugPrint('SeedService: Firebase non initialisé pour les profils');
+      debugPrint('SeedService: Firebase non initialisé pour les réservations');
       return false;
     }
 
-    debugPrint('=== DÉBUT SEED PROFILS AGENTS ===');
+    debugPrint('=== DÉBUT SEED RÉSERVATIONS ===');
 
     try {
-      final profiles = AgentSeedData.getAgentProfiles();
-      debugPrint('SeedService: Insertion de ${profiles.length} profils agents...');
+      final testBookings = [
+        {
+          'id': 'booking_test_1',
+          'client_id': 'test_client_1',
+          'start_time': DateTime.now().add(const Duration(days: 1)).toIso8601String(),
+          'end_time': DateTime.now().add(const Duration(days: 1, hours: 4)).toIso8601String(),
+          'location': '123 Test Street',
+          'service_type': 'Protection Test',
+          'cost': 250.0,
+          'status': 'pending',
+          'notes': 'Test booking',
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        {
+          'id': 'booking_test_2',
+          'client_id': 'test_client_1',
+          'start_time': DateTime.now().add(const Duration(days: 2)).toIso8601String(),
+          'end_time': DateTime.now().add(const Duration(days: 2, hours: 6)).toIso8601String(),
+          'location': '456 Test Avenue',
+          'service_type': 'Security Event',
+          'cost': 400.0,
+          'status': 'confirmed',
+          'notes': 'Event test booking',
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+      ];
+
+      debugPrint('SeedService: Insertion de ${testBookings.length} réservations...');
 
       int successCount = 0;
       int errorCount = 0;
 
-      for (final profileData in profiles) {
+      for (final bookingData in testBookings) {
         try {
-          // Créer le document dans la collection agent_profiles
           await FirebaseService.insertData(
-            FirebaseService.agentProfilesCollection,
-            profileData,
+            FirebaseService.bookingsCollection,
+            bookingData,
           );
           successCount++;
-          debugPrint('SeedService: Profil agent ${profileData['user_id']} créé avec succès');
+          debugPrint('SeedService: Réservation ${bookingData['id']} créée avec succès');
         } catch (e) {
           errorCount++;
-          debugPrint('SeedService: Erreur création profil ${profileData['user_id']}: $e');
+          debugPrint('SeedService: Erreur création réservation ${bookingData['id']}: $e');
         }
       }
 
-      debugPrint('=== FIN SEED PROFILS AGENTS ===');
-      debugPrint('SeedService: Profils - Succès: $successCount, Erreurs: $errorCount');
+      debugPrint('=== FIN SEED RÉSERVATIONS ===');
+      debugPrint('SeedService: Réservations - Succès: $successCount, Erreurs: $errorCount');
 
       return successCount > 0;
     } catch (e) {
-      debugPrint('SeedService: Erreur globale lors du seed des profils: $e');
+      debugPrint('SeedService: Erreur globale lors du seed des réservations: $e');
       return false;
     }
   }
@@ -121,17 +171,17 @@ class SeedService {
     debugPrint('=== DÉBUT SEED COMPLET ===');
 
     try {
-      // Seed des agents de base
-      final agentsSuccess = await seedAgents();
+      // Seed des utilisateurs de test
+      final usersSuccess = await seedTestUsers();
 
-      // Seed des profils détaillés
-      final profilesSuccess = await seedAgentProfiles();
+      // Seed des réservations de test
+      final bookingsSuccess = await seedTestBookings();
 
       debugPrint('=== FIN SEED COMPLET ===');
-      debugPrint('SeedService: Agents: ${agentsSuccess ? '✓' : '✗'}');
-      debugPrint('SeedService: Profils: ${profilesSuccess ? '✓' : '✗'}');
+      debugPrint('SeedService: Utilisateurs: ${usersSuccess ? '✓' : '✗'}');
+      debugPrint('SeedService: Réservations: ${bookingsSuccess ? '✓' : '✗'}');
 
-      return agentsSuccess && profilesSuccess;
+      return usersSuccess && bookingsSuccess;
     } catch (e) {
       debugPrint('SeedService: Erreur lors du seed complet: $e');
       return false;
@@ -148,35 +198,41 @@ class SeedService {
     debugPrint('=== DÉBUT NETTOYAGE SEED ===');
 
     try {
-      // Supprimer tous les agents
-      final agentsSnapshot = await FirebaseService.agentsCollection.get();
-      int deletedAgents = 0;
+      // Supprimer tous les utilisateurs de test
+      final usersSnapshot = await FirebaseService.usersCollection.get();
+      int deletedUsers = 0;
 
-      for (final doc in agentsSnapshot.docs) {
-        try {
-          await doc.reference.delete();
-          deletedAgents++;
-        } catch (e) {
-          debugPrint('SeedService: Erreur suppression agent ${doc.id}: $e');
+      for (final doc in usersSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data['id']?.toString().startsWith('test_') == true) {
+          try {
+            await doc.reference.delete();
+            deletedUsers++;
+          } catch (e) {
+            debugPrint('SeedService: Erreur suppression utilisateur ${doc.id}: $e');
+          }
         }
       }
 
-      // Supprimer tous les profils agents
-      final profilesSnapshot = await FirebaseService.agentProfilesCollection.get();
-      int deletedProfiles = 0;
+      // Supprimer toutes les réservations de test
+      final bookingsSnapshot = await FirebaseService.bookingsCollection.get();
+      int deletedBookings = 0;
 
-      for (final doc in profilesSnapshot.docs) {
-        try {
-          await doc.reference.delete();
-          deletedProfiles++;
-        } catch (e) {
-          debugPrint('SeedService: Erreur suppression profil ${doc.id}: $e');
+      for (final doc in bookingsSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data['id']?.toString().startsWith('booking_test_') == true) {
+          try {
+            await doc.reference.delete();
+            deletedBookings++;
+          } catch (e) {
+            debugPrint('SeedService: Erreur suppression réservation ${doc.id}: $e');
+          }
         }
       }
 
       debugPrint('=== FIN NETTOYAGE SEED ===');
-      debugPrint('SeedService: Agents supprimés: $deletedAgents');
-      debugPrint('SeedService: Profils supprimés: $deletedProfiles');
+      debugPrint('SeedService: Utilisateurs supprimés: $deletedUsers');
+      debugPrint('SeedService: Réservations supprimées: $deletedBookings');
 
       return true;
     } catch (e) {
@@ -209,26 +265,36 @@ class SeedService {
   // Obtenir des statistiques sur les données seed
   static Future<Map<String, int>> getSeedStats() async {
     if (!FirebaseService.isInitialized) {
-      return {'agents': 0, 'profiles': 0};
+      return {'users': 0, 'bookings': 0};
     }
 
     try {
       debugPrint('SeedService: Récupération des statistiques...');
 
       // Utiliser get() au lieu de count() pour éviter les permissions d'agrégation
-      final agentsSnapshot = await FirebaseService.agentsCollection.get();
-      final profilesSnapshot = await FirebaseService.agentProfilesCollection.get();
+      final usersSnapshot = await FirebaseService.usersCollection.get();
+      final bookingsSnapshot = await FirebaseService.bookingsCollection.get();
+
+      final testUsers = usersSnapshot.docs.where((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return data['id']?.toString().startsWith('test_') == true;
+      }).length;
+
+      final testBookings = bookingsSnapshot.docs.where((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return data['id']?.toString().startsWith('booking_test_') == true;
+      }).length;
 
       final stats = {
-        'agents': agentsSnapshot.docs.length,
-        'profiles': profilesSnapshot.docs.length,
+        'users': testUsers,
+        'bookings': testBookings,
       };
 
       debugPrint('SeedService: Statistiques récupérées: $stats');
       return stats;
     } catch (e) {
       debugPrint('SeedService: Erreur lors de la récupération des statistiques: $e');
-      return {'agents': 0, 'profiles': 0};
+      return {'users': 0, 'bookings': 0};
     }
   }
 }

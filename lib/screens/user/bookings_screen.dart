@@ -190,7 +190,7 @@ class _BookingList extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              b.agent.name,
+                              b.agent?.name ?? 'Agent non assigné',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -198,7 +198,7 @@ class _BookingList extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              b.agent.title,
+                              b.agent != null ? (b.agent!.title ?? 'Agent de sécurité') : 'En attente d\'assignation',
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
@@ -237,7 +237,7 @@ class _BookingList extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          '${b.start.day}/${b.start.month}/${b.start.year}',
+                          '${b.startTime.day}/${b.startTime.month}/${b.startTime.year}',
                           style: const TextStyle(fontSize: 14),
                         ),
                       ),
@@ -248,7 +248,7 @@ class _BookingList extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '${b.start.hour}:${b.start.minute.toString().padLeft(2, '0')} - ${b.end.hour}:${b.end.minute.toString().padLeft(2, '0')}',
+                        '${b.startTime.hour.toString().padLeft(2, '0')}:${b.startTime.minute.toString().padLeft(2, '0')} - ${b.endTime.hour.toString().padLeft(2, '0')}:${b.endTime.minute.toString().padLeft(2, '0')}',
                         style: const TextStyle(fontSize: 14),
                       ),
                     ],

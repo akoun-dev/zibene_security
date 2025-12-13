@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../models/booking.dart';
+import '../../models/booking_model.dart';
 import '../../utils/theme.dart';
 import 'messages_screen.dart';
 import 'rate_review_screen.dart';
 
 class BookingDetailScreen extends StatelessWidget {
-  final Booking booking;
+  final BookingModel booking;
   const BookingDetailScreen({super.key, required this.booking});
 
   @override
@@ -18,8 +18,8 @@ class BookingDetailScreen extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const CircleAvatar(child: Icon(Icons.person)),
-              title: Text(booking.agent.name),
-              subtitle: Text(booking.agent.formattedMatricule),
+              title: Text('Agent assigné'),
+              subtitle: Text('En attente d\'assignation'),
               trailing: _StatusChip(status: booking.status),
             ),
           ),
@@ -60,19 +60,21 @@ class BookingDetailScreen extends StatelessWidget {
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => MessagesScreen(peerName: booking.agent.name)),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Fonctionnalité désactivée')),
                   );
                 },
-                child: const Text('Contacter l\'agent'),
+                child: const Text('Contacter le support'),
               ),
             ),
           ]),
           const SizedBox(height: 12),
           ElevatedButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => RateReviewScreen(agentName: booking.agent.name)),
-            ),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Fonctionnalité désactivée')),
+              );
+            },
             child: const Text('Évaluer et commenter'),
           )
         ],

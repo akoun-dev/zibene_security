@@ -1,798 +1,403 @@
 import 'package:flutter/material.dart';
-import '../../models/agent_model.dart';
+import '../../models/agent_simple.dart';
 import '../../utils/theme.dart';
-import 'booking_confirm_screen.dart';
+import 'agent_booking_screen.dart';
 
 class AgentProfileScreen extends StatelessWidget {
   final Agent agent;
+
   const AgentProfileScreen({super.key, required this.agent});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil de l\'agent')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.cardDark,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  Semantics(
-                    image: true,
-                    label: 'Photo de profil de ${agent.name}',
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: AppColors.yellow.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.person,
-                        color: AppColors.yellow,
-                        size: 40,
-                        semanticLabel: 'Photo de profil',
-                      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 300,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: agent.photo.isNotEmpty
+                  ? Image.network(
+                      agent.photo,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: AppColors.darkGray,
+                          child: const Icon(Icons.person, size: 100, color: AppColors.textSecondary),
+                        );
+                      },
+                    )
+                  : Container(
+                      color: AppColors.darkGray,
+                      child: const Icon(Icons.person, size: 100, color: AppColors.textSecondary),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    agent.name,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Agent de sécurité',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Semantics(
-                        container: true,
-                        label: agent.available ? 'Statut disponible' : 'Statut occupé',
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: agent.available ? AppColors.success.withValues(alpha: 0.15) : AppColors.danger.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.circle,
-                                color: agent.available ? AppColors.success : AppColors.danger,
-                                size: 8,
-                                semanticLabel: agent.available ? 'Disponible' : 'Occupé',
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                agent.available ? 'Disponible' : 'Occupé',
-                                style: TextStyle(
-                                  color: agent.available ? AppColors.success : AppColors.danger,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Semantics(
-                        label: 'Matricule',
-                        value: agent.formattedMatricule,
-                        child: Row(
-                          children: [
-                            const Icon(Icons.badge, color: AppColors.yellow, size: 16, semanticLabel: 'Matricule'),
-                            const SizedBox(width: 4),
-                            Text(
-                              agent.formattedMatricule,
-                              style: const TextStyle(fontSize: 14, color: AppColors.yellow, fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
             ),
-            const SizedBox(height: 24),
-
-            // Informations personnelles
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.cardDark,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Informations personnelles',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+          ),
+          SliverToBoxAdapter(
+            child: Column(
+        children: [
+          // Section principale avec photo et informations de base
+          Container(
+            margin: const EdgeInsets.only(top: 20),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: agent.photo.isNotEmpty
+                          ? NetworkImage(agent.photo)
+                          : null,
+                      child: agent.photo.isEmpty
+                          ? const Icon(Icons.person, size: 50)
+                          : null,
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.cake, color: AppColors.textSecondary, size: 18),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Âge:',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  agent.formattedAge,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(Icons.person_outline, color: AppColors.textSecondary, size: 18),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Genre:',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  agent.formattedGender,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.opacity, color: AppColors.textSecondary, size: 18),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Groupe S:',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  agent.bloodGroup,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(Icons.school, color: AppColors.textSecondary, size: 18),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Niveau: ${agent.educationLevel}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (agent.antecedents.isNotEmpty && agent.antecedents != 'Non spécifié') ...[
-                    const SizedBox(height: 12),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.gavel, color: AppColors.textSecondary, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Antécédents:',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            agent.antecedents,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Bio
-            if (agent.bio.isNotEmpty) ...[
-              const Text(
-                'Biographie',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.cardDark,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  agent.bio,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-            ],
-
-            // Experience
-            if (agent.experience.isNotEmpty) ...[
-              const Text(
-                'Expérience',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.cardDark,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  agent.experience,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-            ],
-
-            // Skills
-            if (agent.skills.isNotEmpty) ...[
-              const Text(
-                'Compétences',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: agent.skills.map((skill) => Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.yellow.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    skill,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.yellow,
-                    ),
-                  ),
-                )).toList(),
-              ),
-              const SizedBox(height: 24),
-            ],
-
-            // Informations de contact
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.cardDark,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.yellow.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.info_outline, color: AppColors.yellow, size: 20),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Informations',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.yellow,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      const Icon(Icons.schedule, color: AppColors.textSecondary, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Disponibilité',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            Text(
-                              agent.available ? 'Disponible pour missions' : 'Actuellement en mission',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: agent.available ? AppColors.success : AppColors.warning,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: AppColors.yellow, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Note moyenne',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            Text(
-                              '5.0/5', // TODO: Implement real rating
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.yellow,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      const Icon(Icons.task_alt, color: AppColors.info, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Missions complétées',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            Text(
-                              '0+ missions', // TODO: Implement real count
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.info,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Section Évaluations et Avis
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.cardDark,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.yellow.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Évaluations et avis',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.yellow,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          _showAddReviewDialog(context);
-                        },
-                        child: const Text(
-                          'Ajouter un avis',
-                          style: TextStyle(
-                            color: AppColors.yellow,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Note moyenne
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: AppColors.yellow, size: 24),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '5.0',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.yellow,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Column(
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Excellent',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                            agent.name,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.star,
+                                color: AppColors.yellow,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                agent.formattedRating,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '(${agent.reviewCount} avis)',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              if (agent.isVerified) ...[
+                                const SizedBox(width: 8),
+                                Icon(Icons.verified, color: AppColors.success, size: 20),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 8),
                           Text(
-                            'Basé sur 0 avis',
-                            style: TextStyle(
-                              fontSize: 14,
+                            agent.specialtyDisplay,
+                            style: const TextStyle(
+                              fontSize: 16,
                               color: AppColors.textSecondary,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 16),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _StatItem(
+                      label: 'Expérience',
+                      value: agent.formattedExperience,
+                      icon: Icons.work_outline,
+                    ),
+                    _StatItem(
+                      label: 'Tarif',
+                      value: agent.formattedHourlyRate,
+                      icon: Icons.attach_money,
+                    ),
+                    _StatItem(
+                      label: 'Statut',
+                      value: agent.statusDisplay,
+                      icon: Icons.circle,
+                      color: agent.statusColor,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
 
-                  // Avis récents
+          // Section biographie
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Biographie',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  agent.bio,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    height: 1.5,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Section compétences
+          if (agent.skills.isNotEmpty) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   const Text(
-                    'Avis récents',
+                    'Compétences',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // Avis d'exemple
-                  _buildReviewCard(
-                    'Jean Dupont',
-                    5.0,
-                    'Agent très professionnel et ponctuel. Mission accomplie avec sérieux et rigueur. Je recommande vivement.',
-                    'Il y a 2 jours',
-                  ),
-                  const SizedBox(height: 12),
-                  _buildReviewCard(
-                    'Marie Laurent',
-                    4.5,
-                    'Très bon service, agent discret et efficace. Légère retard mais communication excellente.',
-                    'Il y a 1 semaine',
-                  ),
-
-                  const SizedBox(height: 16),
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        _showAllReviews(context);
-                      },
-                      child: const Text('Voir tous les avis'),
-                    ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: agent.skills.map((skill) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.yellow.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppColors.yellow.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Text(
+                          skill,
+                          style: const TextStyle(
+                            color: AppColors.yellow,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ],
               ),
             ),
+          ],
 
-            const SizedBox(height: 32),
-            SizedBox(
+          // Section certifications
+          if (agent.certifications.isNotEmpty) ...[
+            Container(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: agent.available ? () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => BookingConfirmScreen(agent: agent)),
-                ) : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: agent.available ? AppColors.yellow : Colors.grey,
-                  foregroundColor: agent.available ? Colors.black : Colors.white,
-                ),
-                child: Text(agent.available ? 'Contacter l\'agent' : 'Agent non disponible'),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Certifications',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ...agent.certifications.map((certification) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.verified,
+                            color: AppColors.success,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              certification,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildReviewCard(String clientName, double rating, String comment, String time) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.cardDark.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.textSecondary.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: AppColors.yellow.withValues(alpha: 0.15),
-                child: const Icon(
-                  Icons.person,
-                  color: AppColors.yellow,
-                  size: 16,
+          // Section localisation
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Localisation',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 12),
+                Row(
                   children: [
-                    Text(
-                      clientName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                    const Icon(
+                      Icons.location_on,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        agent.location,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ),
-                    Row(
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: List.generate(5, (index) {
-                            return Icon(
-                              index < rating.floor()
-                                  ? Icons.star
-                                  : index < rating
-                                      ? Icons.star_half
-                                      : Icons.star_border,
-                              color: AppColors.yellow,
-                              size: 12,
-                            );
-                          }),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          rating.toStringAsFixed(1),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Bouton de réservation
+          if (agent.isAvailable) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => AgentBookingScreen(agent: agent),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.calendar_today),
+                label: const Text('Réserver cet agent'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.yellow,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ] else ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.grey,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.block,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Non disponible pour le moment',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
               ),
-              Text(
-                time,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            comment,
-            style: const TextStyle(
-              fontSize: 13,
-              height: 1.4,
+            ),
+          ],
+
+          const SizedBox(height: 20),
+        ],
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  void _showAddReviewDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Ajouter un avis'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Notez votre expérience avec cet agent:'),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(5, (index) {
-                    return IconButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Fonctionnalité bientôt disponible'),
-                            backgroundColor: AppColors.info,
-                          ),
-                        );
-                      },
-                      icon: Icon(
-                        Icons.star_border,
-                        color: AppColors.yellow,
-                        size: 32,
-                      ),
-                    );
-                  }),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Votre commentaire',
-                    hintText: 'Décrivez votre expérience...',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Annuler'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Merci pour votre avis!'),
-                    backgroundColor: AppColors.success,
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.yellow,
-                foregroundColor: Colors.black,
-              ),
-              child: const Text('Envoyer'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+class _StatItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color? color;
 
-  void _showAllReviews(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Tous les avis'),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 400,
-            child: Column(
-              children: [
-                const Text('Cette fonctionnalité sera bientôt disponible.'),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ListView(
-                    children: [
-                      _buildReviewCard('Jean Dupont', 5.0, 'Agent très professionnel et ponctuel. Mission accomplie avec sérieux et rigueur.', 'Il y a 2 jours'),
-                      _buildReviewCard('Marie Laurent', 4.5, 'Très bon service, agent discret et efficace.', 'Il y a 1 semaine'),
-                      _buildReviewCard('Pierre Martin', 4.0, 'Bon agent, a bien géré la situation.', 'Il y a 2 semaines'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+  const _StatItem({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          size: 28,
+          color: color ?? AppColors.textSecondary,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: color ?? Colors.white,
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Fermer'),
-            ),
-          ],
-        );
-      },
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }
-
