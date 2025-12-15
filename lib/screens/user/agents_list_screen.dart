@@ -71,19 +71,23 @@ class _AgentsListScreenState extends State<AgentsListScreen> {
     String query = _searchController.text.toLowerCase();
     setState(() {
       _filteredAgents = _agents.where((agent) {
-        // Filtre par recherche
-        bool matchesSearch = query.isEmpty ||
+        // Filtre par recherche (incluant le matricule)
+        bool matchesSearch =
+            query.isEmpty ||
             agent.name.toLowerCase().contains(query) ||
             agent.bio.toLowerCase().contains(query) ||
             agent.location.toLowerCase().contains(query) ||
-            agent.skills.any((skill) => skill.toLowerCase().contains(query));
+            agent.skills.any((skill) => skill.toLowerCase().contains(query)) ||
+            agent.matricule.toLowerCase().contains(query);
 
         // Filtre par spécialité
-        bool matchesSpecialty = _selectedSpecialty == 'Tous' ||
+        bool matchesSpecialty =
+            _selectedSpecialty == 'Tous' ||
             agent.specialtyDisplay == _selectedSpecialty;
 
         // Filtre par statut
-        bool matchesStatus = _selectedStatus == 'Tous' ||
+        bool matchesStatus =
+            _selectedStatus == 'Tous' ||
             (_selectedStatus == 'Disponible' && agent.isAvailable) ||
             (_selectedStatus == 'Occupé' && agent.status == AgentStatus.busy);
 
@@ -98,10 +102,7 @@ class _AgentsListScreenState extends State<AgentsListScreen> {
       appBar: AppBar(
         title: const Text('Agents de sécurité'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadAgents,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadAgents),
         ],
       ),
       body: Column(
@@ -112,12 +113,15 @@ class _AgentsListScreenState extends State<AgentsListScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Rechercher...',
+                hintText: 'Rechercher par nom, matricule, compétences...',
                 prefixIcon: const Icon(Icons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 6,
+                ),
                 isDense: true,
                 hintStyle: const TextStyle(fontSize: 13),
               ),
@@ -137,7 +141,10 @@ class _AgentsListScreenState extends State<AgentsListScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 4,
+                      ),
                       isDense: true,
                       labelStyle: const TextStyle(fontSize: 11),
                     ),
@@ -166,7 +173,10 @@ class _AgentsListScreenState extends State<AgentsListScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 4,
+                      ),
                       isDense: true,
                       labelStyle: const TextStyle(fontSize: 11),
                     ),
@@ -197,56 +207,65 @@ class _AgentsListScreenState extends State<AgentsListScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredAgents.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.people_alt_outlined,
-                                size: 64, color: AppColors.textSecondary),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Aucun agent trouvé',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.people_alt_outlined,
+                          size: 64,
+                          color: AppColors.textSecondary,
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                        itemCount: _filteredAgents.length,
-                        itemBuilder: (context, index) {
-                          final agent = _filteredAgents[index];
-                          return AgentCard(
-                            agent: agent,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => AgentProfileScreen(agent: agent),
-                                ),
-                              );
-                            },
-                            onBook: () {
-                              if (agent.isAvailable) {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => AgentBookingScreen(agent: agent),
-                                  ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Cet agent n\'est pas disponible'),
-                                    backgroundColor: AppColors.warning,
-                                  ),
-                                );
-                              }
-                            },
+                        const SizedBox(height: 16),
+                        Text(
+                          'Aucun agent trouvé',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 4,
+                    ),
+                    itemCount: _filteredAgents.length,
+                    itemBuilder: (context, index) {
+                      final agent = _filteredAgents[index];
+                      return AgentCard(
+                        agent: agent,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => AgentProfileScreen(agent: agent),
+                            ),
                           );
                         },
-                      ),
+                        onBook: () {
+                          if (agent.isAvailable) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    AgentBookingScreen(agent: agent),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Cet agent n\'est pas disponible',
+                                ),
+                                backgroundColor: AppColors.warning,
+                              ),
+                            );
+                          }
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -359,7 +378,11 @@ class AgentCard extends StatelessWidget {
                       ),
                       if (agent.isVerified) ...[
                         const SizedBox(height: 2),
-                        Icon(Icons.verified, size: 14, color: AppColors.success),
+                        Icon(
+                          Icons.verified,
+                          size: 14,
+                          color: AppColors.success,
+                        ),
                       ],
                     ],
                   ),
@@ -372,11 +395,18 @@ class AgentCard extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        const Icon(Icons.star, size: 14, color: AppColors.yellow),
+                        const Icon(
+                          Icons.star,
+                          size: 14,
+                          color: AppColors.yellow,
+                        ),
                         const SizedBox(width: 3),
                         Text(
                           agent.formattedRating,
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
                         ),
                         const SizedBox(width: 3),
                         Flexible(
@@ -421,8 +451,12 @@ class AgentCard extends StatelessWidget {
                     style: const TextStyle(fontSize: 13),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: agent.isAvailable ? AppColors.yellow : Colors.grey,
-                    foregroundColor: agent.isAvailable ? Colors.black : Colors.white,
+                    backgroundColor: agent.isAvailable
+                        ? AppColors.yellow
+                        : Colors.grey,
+                    foregroundColor: agent.isAvailable
+                        ? Colors.black
+                        : Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     minimumSize: const Size(double.infinity, 32),
                   ),
