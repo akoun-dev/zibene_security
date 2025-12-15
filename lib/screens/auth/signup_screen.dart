@@ -45,29 +45,21 @@ class _SignUpScreenState extends State<SignUpScreen>
       vsync: this,
     );
 
-    _iconAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _iconController,
-      curve: Curves.elasticOut,
-    ));
+    _iconAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _iconController, curve: Curves.elasticOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _contentController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _contentController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _contentController,
-      curve: Curves.easeIn,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _contentController, curve: Curves.easeIn),
+    );
 
     _iconController.forward();
     _contentController.forward();
@@ -93,9 +85,7 @@ class _SignUpScreenState extends State<SignUpScreen>
           content: Text('please_accept_terms'.t(context)),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
       return;
@@ -113,7 +103,10 @@ class _SignUpScreenState extends State<SignUpScreen>
 
     if (success && mounted) {
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => VerifyEmailScreen(email: _emailController.text.trim())),
+        MaterialPageRoute(
+          builder: (_) =>
+              VerifyEmailScreen(email: _emailController.text.trim()),
+        ),
       );
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -121,9 +114,7 @@ class _SignUpScreenState extends State<SignUpScreen>
           content: Text(authProvider.error ?? 'registration_failed'.t(context)),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
     }
@@ -173,7 +164,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
-                            shape: BoxShape.circle,
+                            borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
                                 color: AppColors.yellow.withValues(alpha: 0.3),
@@ -182,10 +173,13 @@ class _SignUpScreenState extends State<SignUpScreen>
                               ),
                             ],
                           ),
-                          child: const Icon(
-                            Icons.person_add,
-                            size: 50,
-                            color: AppColors.yellow,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.asset(
+                              'assets/images/bee-logo.png',
+                              width: 50,
+                              height: 50,
+                            ),
                           ),
                         ),
                       );
@@ -241,7 +235,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   margin: const EdgeInsets.all(12),
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: AppColors.yellow.withValues(alpha: 0.1),
+                                    color: AppColors.yellow.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Icon(
@@ -294,7 +290,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   margin: const EdgeInsets.all(12),
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: AppColors.yellow.withValues(alpha: 0.1),
+                                    color: AppColors.yellow.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Icon(
@@ -318,7 +316,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 if (value == null || value.trim().isEmpty) {
                                   return 'email_required'.t(context);
                                 }
-                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                if (!RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                ).hasMatch(value)) {
                                   return 'enter_valid_email'.t(context);
                                 }
                                 return null;
@@ -348,7 +348,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   margin: const EdgeInsets.all(12),
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: AppColors.yellow.withValues(alpha: 0.1),
+                                    color: AppColors.yellow.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Icon(
@@ -372,7 +374,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 if (value == null || value.trim().isEmpty) {
                                   return 'phone_required'.t(context);
                                 }
-                                if (!RegExp(r'^[\+]?[1-9][\d]{0,15}$').hasMatch(value.replaceAll(RegExp(r'[^\d+]'), ''))) {
+                                if (!RegExp(r'^[\+]?[1-9][\d]{0,15}$').hasMatch(
+                                  value.replaceAll(RegExp(r'[^\d+]'), ''),
+                                )) {
                                   return 'enter_valid_phone'.t(context);
                                 }
                                 return null;
@@ -402,7 +406,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   margin: const EdgeInsets.all(12),
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: AppColors.yellow.withValues(alpha: 0.1),
+                                    color: AppColors.yellow.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Icon(
@@ -418,7 +424,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                    _obscurePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
                                     color: AppColors.textSecondary,
                                   ),
                                   onPressed: () {
@@ -440,7 +448,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 if (value.length < 6) {
                                   return 'password_too_short'.t(context);
                                 }
-                                if (!RegExp(r'(?=.*[A-Z])(?=.*[a-z])(?=.*\d)').hasMatch(value)) {
+                                if (!RegExp(
+                                  r'(?=.*[A-Z])(?=.*[a-z])(?=.*\d)',
+                                ).hasMatch(value)) {
                                   return 'password_requirements'.t(context);
                                 }
                                 return null;
@@ -470,7 +480,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   margin: const EdgeInsets.all(12),
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: AppColors.yellow.withValues(alpha: 0.1),
+                                    color: AppColors.yellow.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Icon(
@@ -486,12 +498,15 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                                    _obscureConfirmPassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
                                     color: AppColors.textSecondary,
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                                      _obscureConfirmPassword =
+                                          !_obscureConfirmPassword;
                                     });
                                   },
                                 ),
@@ -523,9 +538,13 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(4),
                                   border: Border.all(
-                                    color: _acceptTerms ? AppColors.yellow : const Color(0xFF2A2A2A),
+                                    color: _acceptTerms
+                                        ? AppColors.yellow
+                                        : const Color(0xFF2A2A2A),
                                   ),
-                                  color: _acceptTerms ? AppColors.yellow.withValues(alpha: 0.2) : Colors.transparent,
+                                  color: _acceptTerms
+                                      ? AppColors.yellow.withValues(alpha: 0.2)
+                                      : Colors.transparent,
                                 ),
                                 child: Checkbox(
                                   value: _acceptTerms,
@@ -534,11 +553,14 @@ class _SignUpScreenState extends State<SignUpScreen>
                                       _acceptTerms = value ?? false;
                                     });
                                   },
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                   visualDensity: VisualDensity.compact,
                                   activeColor: AppColors.yellow,
                                   checkColor: const Color(0xFF121212),
-                                  side: const BorderSide(color: Colors.transparent),
+                                  side: const BorderSide(
+                                    color: Colors.transparent,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -546,7 +568,10 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 child: RichText(
                                   text: TextSpan(
                                     text: 'J\'accepte les ',
-                                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 14,
+                                    ),
                                     children: [
                                       TextSpan(
                                         text: 'terms_of_service'.t(context),
@@ -625,14 +650,19 @@ class _SignUpScreenState extends State<SignUpScreen>
                               height: 56,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [AppColors.yellow, AppColors.yellowAccent],
+                                  colors: [
+                                    AppColors.yellow,
+                                    AppColors.yellowAccent,
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.yellow.withValues(alpha: 0.4),
+                                    color: AppColors.yellow.withValues(
+                                      alpha: 0.4,
+                                    ),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -674,7 +704,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
                                 style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
                                 ),
                                 child: Text(
                                   'sign_in'.t(context),
@@ -700,4 +732,3 @@ class _SignUpScreenState extends State<SignUpScreen>
     );
   }
 }
-

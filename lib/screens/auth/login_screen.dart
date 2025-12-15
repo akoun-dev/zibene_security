@@ -40,29 +40,21 @@ class _LoginScreenState extends State<LoginScreen>
       vsync: this,
     );
 
-    _iconAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _iconController,
-      curve: Curves.elasticOut,
-    ));
+    _iconAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _iconController, curve: Curves.elasticOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _contentController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _contentController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _contentController,
-      curve: Curves.easeIn,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _contentController, curve: Curves.easeIn),
+    );
 
     _iconController.forward();
     _contentController.forward();
@@ -78,15 +70,14 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _handleLogin() async {
-    if (_emailController.text.trim().isEmpty || _passwordController.text.isEmpty) {
+    if (_emailController.text.trim().isEmpty ||
+        _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('please_fill_all_fields'.t(context)),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
       return;
@@ -102,7 +93,9 @@ class _LoginScreenState extends State<LoginScreen>
     debugPrint('Sign-in result: $success');
     debugPrint('User role after sign-in: ${authProvider.currentUser?.role}');
     debugPrint('Is admin after sign-in: ${authProvider.isAdmin}');
-    debugPrint('Current user after sign-in: ${authProvider.currentUser?.toFirestore()}');
+    debugPrint(
+      'Current user after sign-in: ${authProvider.currentUser?.toFirestore()}',
+    );
 
     if (success && mounted) {
       // Attendre un peu pour s'assurer que les données utilisateur sont bien chargées
@@ -117,10 +110,18 @@ class _LoginScreenState extends State<LoginScreen>
       // Redirection automatique en fonction du rôle
       if (authProvider.isAdmin) {
         debugPrint('Redirecting to admin shell');
-        Navigator.pushNamedAndRemoveUntil(context, Routes.adminShell, (_) => false);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          Routes.adminShell,
+          (_) => false,
+        );
       } else {
         debugPrint('Redirecting to client shell');
-        Navigator.pushNamedAndRemoveUntil(context, Routes.clientShell, (_) => false);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          Routes.clientShell,
+          (_) => false,
+        );
       }
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -128,9 +129,7 @@ class _LoginScreenState extends State<LoginScreen>
           content: Text(authProvider.error ?? 'Échec de la connexion'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
     }
@@ -166,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen>
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
-                          shape: BoxShape.circle,
+                          borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.yellow.withValues(alpha: 0.3),
@@ -175,10 +174,13 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.shield,
-                          size: 50,
-                          color: AppColors.yellow,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.asset(
+                            'assets/images/bee-logo.png',
+                            width: 50,
+                            height: 50,
+                          ),
                         ),
                       ),
                     );
@@ -234,7 +236,9 @@ class _LoginScreenState extends State<LoginScreen>
                                 margin: const EdgeInsets.all(12),
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: AppColors.yellow.withValues(alpha: 0.1),
+                                  color: AppColors.yellow.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
@@ -258,7 +262,9 @@ class _LoginScreenState extends State<LoginScreen>
                               if (value == null || value.trim().isEmpty) {
                                 return 'email_required'.t(context);
                               }
-                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                              if (!RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              ).hasMatch(value)) {
                                 return 'enter_valid_email'.t(context);
                               }
                               return null;
@@ -289,7 +295,9 @@ class _LoginScreenState extends State<LoginScreen>
                                 margin: const EdgeInsets.all(12),
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: AppColors.yellow.withValues(alpha: 0.1),
+                                  color: AppColors.yellow.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
@@ -305,7 +313,9 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                  _obscurePassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
                                   color: AppColors.textSecondary,
                                 ),
                                 onPressed: () {
@@ -341,9 +351,15 @@ class _LoginScreenState extends State<LoginScreen>
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: _rememberMe ? AppColors.yellow : const Color(0xFF2A2A2A),
+                                      color: _rememberMe
+                                          ? AppColors.yellow
+                                          : const Color(0xFF2A2A2A),
                                     ),
-                                    color: _rememberMe ? AppColors.yellow.withValues(alpha: 0.2) : Colors.transparent,
+                                    color: _rememberMe
+                                        ? AppColors.yellow.withValues(
+                                            alpha: 0.2,
+                                          )
+                                        : Colors.transparent,
                                   ),
                                   child: Checkbox(
                                     value: _rememberMe,
@@ -352,11 +368,14 @@ class _LoginScreenState extends State<LoginScreen>
                                         _rememberMe = value ?? false;
                                       });
                                     },
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                     visualDensity: VisualDensity.compact,
                                     activeColor: AppColors.yellow,
                                     checkColor: const Color(0xFF121212),
-                                    side: const BorderSide(color: Colors.transparent),
+                                    side: const BorderSide(
+                                      color: Colors.transparent,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -372,11 +391,16 @@ class _LoginScreenState extends State<LoginScreen>
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const ForgotPasswordScreen(),
+                                  ),
                                 );
                               },
                               style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
                               ),
                               child: Text(
                                 'forgot_password'.t(context),
@@ -413,14 +437,19 @@ class _LoginScreenState extends State<LoginScreen>
                             height: 56,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [AppColors.yellow, AppColors.yellowAccent],
+                                colors: [
+                                  AppColors.yellow,
+                                  AppColors.yellowAccent,
+                                ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.yellow.withValues(alpha: 0.4),
+                                  color: AppColors.yellow.withValues(
+                                    alpha: 0.4,
+                                  ),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),
@@ -462,11 +491,15 @@ class _LoginScreenState extends State<LoginScreen>
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const SignUpScreen()),
+                                  MaterialPageRoute(
+                                    builder: (_) => const SignUpScreen(),
+                                  ),
                                 );
                               },
                               style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
                               ),
                               child: Text(
                                 'sign_up'.t(context),
