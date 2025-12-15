@@ -5,6 +5,7 @@ import '../../utils/theme.dart';
 import '../../utils/translation_helper.dart';
 import '../admin/admin_dashboard_screen.dart';
 import '../admin/users_screen.dart';
+import '../admin/agents_management_screen.dart';
 import '../admin/bookings_management_screen.dart';
 import '../admin/reports_screen.dart';
 import '../admin/alerts_screen.dart';
@@ -30,6 +31,7 @@ class _AdminShellState extends State<AdminShell> {
     final pages = [
       const AdminDashboardScreen(),
       const UsersScreen(),
+      const AgentsManagementScreen(),
       const BookingsManagementScreen(),
       const ReportsScreen(),
     ];
@@ -124,6 +126,7 @@ class _AdminShellState extends State<AdminShell> {
         destinations: [
           NavigationDestination(icon: const Icon(Icons.dashboard_outlined), label: 'dashboard'.t(context)),
           NavigationDestination(icon: const Icon(Icons.people_alt_outlined), label: 'users'.t(context)),
+          NavigationDestination(icon: const Icon(Icons.security_outlined), label: 'agents'.t(context)),
           NavigationDestination(icon: const Icon(Icons.bookmark_border_outlined), label: 'bookings'.t(context)),
           NavigationDestination(icon: const Icon(Icons.bar_chart_outlined), label: 'reports'.t(context)),
         ],
@@ -198,4 +201,3 @@ class _AdminShellState extends State<AdminShell> {
     }
   }
 }
-

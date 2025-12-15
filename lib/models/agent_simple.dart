@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 enum AgentStatus {
@@ -30,6 +31,10 @@ class Agent {
   final List<String> skills;
   final List<String> certifications;
   final int experience; // en années
+  final String matricule;
+  final int age;
+  final String gender; // Homme, Femme
+  final String bloodGroup; // A+, A-, B+, B-, AB+, AB-, O+, O-
   final String location;
   final bool isVerified;
   final DateTime createdAt;
@@ -50,6 +55,10 @@ class Agent {
     this.skills = const [],
     this.certifications = const [],
     this.experience = 0,
+    this.matricule = '',
+    this.age = 0,
+    this.gender = '',
+    this.bloodGroup = '',
     this.location = '',
     this.isVerified = false,
     required this.createdAt,
@@ -104,6 +113,7 @@ class Agent {
       DateTime safeDateTime(dynamic value, DateTime defaultValue) {
         if (value == null) return defaultValue;
         if (value is DateTime) return value;
+        if (value is Timestamp) return value.toDate();
         if (value is String) {
           return DateTime.tryParse(value) ?? defaultValue;
         }
@@ -133,6 +143,10 @@ class Agent {
         skills: safeStringList(data['skills']),
         certifications: safeStringList(data['certifications']),
         experience: safeInt(data['experience'], 0),
+        matricule: safeString(data['matricule'], ''),
+        age: safeInt(data['age'], 0),
+        gender: safeString(data['gender'], ''),
+        bloodGroup: safeString(data['blood_group'], ''),
         location: safeString(data['location'], 'Non spécifiée'),
         isVerified: safeBool(data['is_verified'], false),
         createdAt: safeDateTime(data['created_at'], DateTime.now()),
@@ -172,6 +186,10 @@ class Agent {
       'skills': skills,
       'certifications': certifications,
       'experience': experience,
+      'matricule': matricule,
+      'age': age,
+      'gender': gender,
+      'blood_group': bloodGroup,
       'location': location,
       'is_verified': isVerified,
       'created_at': createdAt.toIso8601String(),
@@ -229,6 +247,10 @@ class Agent {
     List<String>? skills,
     List<String>? certifications,
     int? experience,
+    String? matricule,
+    int? age,
+    String? gender,
+    String? bloodGroup,
     String? location,
     bool? isVerified,
     DateTime? createdAt,
@@ -249,6 +271,10 @@ class Agent {
       skills: skills ?? this.skills,
       certifications: certifications ?? this.certifications,
       experience: experience ?? this.experience,
+      matricule: matricule ?? this.matricule,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
+      bloodGroup: bloodGroup ?? this.bloodGroup,
       location: location ?? this.location,
       isVerified: isVerified ?? this.isVerified,
       createdAt: createdAt ?? this.createdAt,

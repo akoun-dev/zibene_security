@@ -119,11 +119,6 @@ class AgentProfileScreen extends StatelessWidget {
                       icon: Icons.work_outline,
                     ),
                     _StatItem(
-                      label: 'Tarif',
-                      value: agent.formattedHourlyRate,
-                      icon: Icons.attach_money,
-                    ),
-                    _StatItem(
                       label: 'Statut',
                       value: agent.statusDisplay,
                       icon: Icons.circle,

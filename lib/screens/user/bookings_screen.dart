@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/booking_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../models/booking_model.dart';
 import '../../utils/theme.dart';
 import '../../utils/translation_helper.dart';
 import 'booking_detail_screen.dart';
@@ -15,7 +16,6 @@ class BookingsScreen extends StatefulWidget {
 
 class _BookingsScreenState extends State<BookingsScreen> {
   bool _isLoading = false;
-  bool _hasLoaded = false;
 
   @override
   void initState() {
@@ -25,20 +25,27 @@ class _BookingsScreenState extends State<BookingsScreen> {
   }
 
   Future<void> _loadBookings() async {
-    if (_isLoading || _hasLoaded || !mounted) return;
+    if (_isLoading || !mounted) return;
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
+      final bookingProvider = Provider.of<BookingProvider>(
+        context,
+        listen: false,
+      );
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
       if (authProvider.isAuthenticated && authProvider.currentUser != null) {
-        await bookingProvider.fetchUserBookings(authProvider.currentUser!.id, authProvider.currentUser!.role.name);
+        await bookingProvider.fetchUserBookings(
+          authProvider.currentUser!.id,
+          'client',
+        );
+        // Forcer le rechargement des noms d'agents après le chargement des réservations
+        await bookingProvider.refreshAgentNames();
       }
-      _hasLoaded = true;
     } finally {
       if (mounted) {
         setState(() {
@@ -48,16 +55,41 @@ class _BookingsScreenState extends State<BookingsScreen> {
     }
   }
 
+  Future<void> _refreshAgentNames() async {
+    try {
+      final bookingProvider = Provider.of<BookingProvider>(
+        context,
+        listen: false,
+      );
+      await bookingProvider.refreshAgentNames();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Noms d\'agents actualisés'),
+            backgroundColor: AppColors.success,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: $e'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bookingProvider = Provider.of<BookingProvider>(context);
 
     if (bookingProvider.isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (bookingProvider.error != null) {
@@ -78,38 +110,61 @@ class _BookingsScreenState extends State<BookingsScreen> {
     }
 
     final bookings = bookingProvider.bookings;
-    final upcomingBookings = bookings.where((b) =>
-      b.status.toString() != 'completed' && b.status.toString() != 'cancelled'
-    ).toList();
-    final pastBookings = bookings.where((b) =>
-      b.status.toString() == 'completed' || b.status.toString() == 'cancelled'
-    ).toList();
+    final upcomingBookings = bookings
+        .where(
+          (b) =>
+              b.status.toString() != 'completed' &&
+              b.status.toString() != 'cancelled',
+        )
+        .toList();
+    final completedBookings = bookings
+        .where((b) => b.status.toString() == 'completed')
+        .toList();
+    final cancelledBookings = bookings
+        .where((b) => b.status.toString() == 'cancelled')
+        .toList();
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: Text('my_bookings'.t(context)),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _loadBookings,
+              tooltip: 'Actualiser',
+            ),
+            IconButton(
+              icon: const Icon(Icons.person_search),
+              onPressed: _refreshAgentNames,
+              tooltip: 'Rafraîchir les noms d\'agents',
+            ),
+          ],
           bottom: TabBar(
             tabs: [
+              Tab(text: 'all'.t(context)),
               Tab(text: 'upcoming'.t(context)),
               Tab(text: 'completed'.t(context)),
               Tab(text: 'cancelled'.t(context)),
             ],
           ),
         ),
-        body: TabBarView(children: [
-          _BookingList(bookings: upcomingBookings, status: 'upcoming'),
-          _BookingList(bookings: pastBookings.where((b) => b.status.toString() == 'completed').toList(), status: 'completed'),
-          _BookingList(bookings: pastBookings.where((b) => b.status.toString() == 'cancelled').toList(), status: 'cancelled'),
-        ]),
+        body: TabBarView(
+          children: [
+            _BookingList(bookings: bookings, status: 'all'),
+            _BookingList(bookings: upcomingBookings, status: 'upcoming'),
+            _BookingList(bookings: completedBookings, status: 'completed'),
+            _BookingList(bookings: cancelledBookings, status: 'cancelled'),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _BookingList extends StatelessWidget {
-  final List bookings;
+  final List<BookingModel> bookings;
   final String status;
   const _BookingList({required this.bookings, required this.status});
 
@@ -121,17 +176,25 @@ class _BookingList extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              status == 'upcoming' ? Icons.event_busy : status == 'completed' ? Icons.check_circle : Icons.cancel,
+              status == 'all'
+                  ? Icons.event_note
+                  : status == 'upcoming'
+                  ? Icons.event_busy
+                  : status == 'completed'
+                  ? Icons.check_circle
+                  : Icons.cancel,
               size: 64,
               color: AppColors.textSecondary,
             ),
             const SizedBox(height: 16),
             Text(
-              status == 'upcoming'
+              status == 'all'
+                  ? 'no_bookings'.t(context)
+                  : status == 'upcoming'
                   ? 'no_upcoming_bookings'.t(context)
                   : status == 'completed'
-                      ? 'no_completed_bookings'.t(context)
-                      : 'no_cancelled_bookings'.t(context),
+                  ? 'no_completed_bookings'.t(context)
+                  : 'no_cancelled_bookings'.t(context),
               style: const TextStyle(
                 fontSize: 16,
                 color: AppColors.textSecondary,
@@ -159,10 +222,22 @@ class _BookingList extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (_, i) {
         final b = bookings[i];
+        final bookingProvider = Provider.of<BookingProvider>(
+          context,
+          listen: false,
+        );
+        final agentName = (b.agent != null && b.agent!.name.isNotEmpty)
+            ? b.agent!.name
+            : bookingProvider.getAgentName(b.agentId);
+        final agentSubtitle = b.serviceType.isNotEmpty
+            ? b.serviceType
+            : 'Agent de sécurité';
         return Card(
           child: InkWell(
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => BookingDetailScreen(booking: b)),
+              MaterialPageRoute(
+                builder: (_) => BookingDetailScreen(booking: b),
+              ),
             ),
             borderRadius: BorderRadius.circular(12),
             child: Padding(
@@ -172,12 +247,10 @@ class _BookingList extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: AppColors.yellow.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: AppColors.yellow.withValues(
+                          alpha: 0.15,
                         ),
                         child: const Icon(
                           Icons.person,
@@ -190,7 +263,7 @@ class _BookingList extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              b.agent?.name ?? 'Agent non assigné',
+                              agentName,
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -198,7 +271,7 @@ class _BookingList extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              b.agent != null ? (b.agent!.title ?? 'Agent de sécurité') : 'En attente d\'assignation',
+                              agentSubtitle,
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
@@ -210,16 +283,8 @@ class _BookingList extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          _StatusBadge(status: b.status.toString()),
+                          _StatusBadge(status: b.status),
                           const SizedBox(height: 4),
-                          Text(
-                            '\$${b.cost}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.yellow,
-                            ),
-                          ),
                         ],
                       ),
                     ],
@@ -283,7 +348,7 @@ class _BookingList extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  final String status;
+  final BookingStatus status;
 
   const _StatusBadge({required this.status});
 
@@ -292,26 +357,31 @@ class _StatusBadge extends StatelessWidget {
     Color color;
     String text;
 
-    switch (status.toLowerCase()) {
-      case 'confirmed':
+    switch (status) {
+      case BookingStatus.confirmed:
         color = AppColors.success;
         text = 'Confirmed';
         break;
-      case 'pending':
+      case BookingStatus.pending:
         color = AppColors.warning;
         text = 'Pending';
         break;
-      case 'completed':
+      case BookingStatus.completed:
         color = AppColors.info;
         text = 'Completed';
         break;
-      case 'cancelled':
+      case BookingStatus.cancelled:
         color = AppColors.danger;
         text = 'Cancelled';
         break;
-      default:
-        color = AppColors.textSecondary;
-        text = 'Unknown';
+      case BookingStatus.inProgress:
+        color = AppColors.info;
+        text = 'In Progress';
+        break;
+      case BookingStatus.rejected:
+        color = AppColors.danger;
+        text = 'Rejected';
+        break;
     }
 
     return Container(

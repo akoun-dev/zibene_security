@@ -229,9 +229,11 @@ class AppTranslations {
 
     // Bookings List
     'my_bookings': 'Mes réservations',
+    'all': 'Toutes',
     'upcoming': 'À venir',
     'completed': 'Terminées',
     'cancelled': 'Annulées',
+    'no_bookings': 'Aucune réservation',
     'no_upcoming_bookings': 'Aucune réservation à venir',
     'no_completed_bookings': 'Aucune réservation terminée',
     'no_cancelled_bookings': 'Aucune réservation annulée',

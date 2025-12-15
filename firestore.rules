@@ -58,7 +58,13 @@ service cloud.firestore {
       allow read: if isAuthenticated() &&
                      (resource.data.client_id == request.auth.uid ||
                       isAdmin());
-      allow create: if isClient(); // Only clients can create bookings
+      allow create: if isAuthenticated() &&
+                     request.resource.data.client_id == request.auth.uid &&
+                     (
+                       isClient() || // Custom claim
+                       (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'client')
+                     ); // Allow clients (claims or user doc) to create their own bookings
       allow update: if isAuthenticated() &&
                      (resource.data.client_id == request.auth.uid ||
                       isAdmin());

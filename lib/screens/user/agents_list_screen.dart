@@ -392,14 +392,6 @@ class AgentCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Text(
-                    agent.formattedHourlyRate,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.yellow,
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 4),

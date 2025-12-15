@@ -1,11 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/agent_simple.dart';
 import '../data/agent_test_data.dart';
-import 'firebase_service.dart';
 
 class AgentService {
-  static final CollectionReference _agentsCollection =
+  static final CollectionReference<Map<String, dynamic>> _agentsCollection =
       FirebaseFirestore.instance.collection('agents');
+
+  static Agent _fromSnapshot(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data() ?? <String, dynamic>{};
+    return Agent.fromFirestore({
+      ...data,
+      'id': (data['id'] != null && data['id'].toString().isNotEmpty) ? data['id'] : doc.id,
+    });
+  }
 
   // Récupérer tous les agents
   static Future<List<Agent>> getAllAgents() async {
@@ -24,7 +31,7 @@ class AgentService {
         print('Traitement du document: ${doc.id}');
         print('Données du document: ${doc.data()}');
         try {
-          final agent = Agent.fromFirestore(doc.data() as Map<String, dynamic>);
+          final agent = _fromSnapshot(doc);
           agents.add(agent);
           print('Agent créé avec succès: ${agent.name}');
         } catch (e) {
@@ -54,7 +61,7 @@ class AgentService {
           .where('status', isEqualTo: 'available')
           .get();
       final agents = snapshot.docs
-          .map((doc) => Agent.fromFirestore(doc.data() as Map<String, dynamic>))
+          .map(_fromSnapshot)
           .toList();
 
       // Si aucune donnée dans Firestore, utiliser les données de test filtrées
@@ -80,8 +87,8 @@ class AgentService {
   static Future<Agent?> getAgentById(String agentId) async {
     try {
       final doc = await _agentsCollection.doc(agentId).get();
-      if (doc.exists) {
-        return Agent.fromFirestore(doc.data() as Map<String, dynamic>);
+      if (doc.exists && doc.data() != null) {
+        return _fromSnapshot(doc);
       }
       return null;
     } catch (e) {
@@ -92,7 +99,7 @@ class AgentService {
   // Rechercher des agents
   static Future<List<Agent>> searchAgents(String query, {AgentSpecialty? specialty}) async {
     try {
-      Query queryRef = _agentsCollection;
+      Query<Map<String, dynamic>> queryRef = _agentsCollection;
 
       // Filtrer par spécialité si spécifiée
       if (specialty != null) {
@@ -101,7 +108,7 @@ class AgentService {
 
       final snapshot = await queryRef.get();
       final agents = snapshot.docs
-          .map((doc) => Agent.fromFirestore(doc.data() as Map<String, dynamic>))
+          .map(_fromSnapshot)
           .toList();
 
       // Filtrer par texte (nom, bio, skills, location)
@@ -128,7 +135,7 @@ class AgentService {
           .where('specialty', isEqualTo: specialty.toString().split('.').last)
           .get();
       return snapshot.docs
-          .map((doc) => Agent.fromFirestore(doc.data() as Map<String, dynamic>))
+          .map(_fromSnapshot)
           .toList();
     } catch (e) {
       throw Exception('Erreur lors de la récupération des agents par spécialité: $e');
@@ -138,7 +145,12 @@ class AgentService {
   // Créer un agent (pour l'admin)
   static Future<String> createAgent(Agent agent) async {
     try {
-      final docRef = await _agentsCollection.add(agent.toFirestore());
+      final docRef = _agentsCollection.doc();
+      final data = {
+        ...agent.toFirestore(),
+        'id': agent.id.isNotEmpty ? agent.id : docRef.id,
+      };
+      await docRef.set(data);
       return docRef.id;
     } catch (e) {
       throw Exception('Erreur lors de la création de l\'agent: $e');
@@ -179,9 +191,7 @@ class AgentService {
   static Stream<List<Agent>> streamAllAgents() {
     return _agentsCollection
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Agent.fromFirestore(doc.data() as Map<String, dynamic>))
-            .toList());
+        .map((snapshot) => snapshot.docs.map(_fromSnapshot).toList());
   }
 
   // Stream des agents disponibles
@@ -189,8 +199,6 @@ class AgentService {
     return _agentsCollection
         .where('status', isEqualTo: 'available')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Agent.fromFirestore(doc.data() as Map<String, dynamic>))
-            .toList());
+        .map((snapshot) => snapshot.docs.map(_fromSnapshot).toList());
   }
 }

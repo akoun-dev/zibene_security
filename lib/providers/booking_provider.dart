@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/firebase_service.dart';
 import '../services/temp_data_service.dart';
+import '../services/agent_name_service.dart';
 import '../models/booking_model.dart';
 
 class BookingProvider extends ChangeNotifier {
@@ -8,17 +9,47 @@ class BookingProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   BookingModel? _currentBooking;
+  Map<String, String> _agentNames = {}; // Cache des noms d'agents
 
   List<BookingModel> get bookings => _bookings;
   bool get isLoading => _isLoading;
   String? get error => _error;
   BookingModel? get currentBooking => _currentBooking;
 
+  // Obtenir le nom d'un agent avec cache
+  String getAgentName(String agentId) {
+    if (_agentNames.containsKey(agentId)) {
+      return _agentNames[agentId]!;
+    }
+    return 'Agent $agentId'; // Fallback immédiat
+  }
+
+  // Forcer le rechargement des noms d'agents
+  Future<void> refreshAgentNames() async {
+    debugPrint('Forçage du rechargement des noms d\'agents');
+
+    if (_bookings.isEmpty) return;
+
+    final uniqueAgentIds = _bookings.map((b) => b.agentId).toSet().toList();
+
+    try {
+      final agentNames = await AgentNameService.getMultipleAgentNames(uniqueAgentIds);
+      _agentNames.clear();
+      _agentNames.addAll(agentNames);
+      debugPrint('Noms des agents rechargés: $agentNames');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Erreur lors du rechargement des noms: $e');
+    }
+  }
+
   // Get user bookings
   Future<void> fetchUserBookings(String userId, String role) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
+
+    debugPrint('Récupération des réservations pour userId: $userId, role: $role');
 
     try {
       final bookingsData = await FirebaseService.getData(
@@ -27,18 +58,48 @@ class BookingProvider extends ChangeNotifier {
         orderBy: 'created_at',
         descending: true,
       );
-      _bookings = bookingsData.map((data) => BookingModel.fromJson(data)).toList();
-          } catch (e) {
+      debugPrint('Nombre de réservations trouvées: ${bookingsData.length}');
+
+      // Convertir les données en réservations
+      List<BookingModel> bookings = bookingsData.map((data) {
+        debugPrint('Données de réservation: $data');
+        return BookingModel.fromJson(data);
+      }).toList();
+
+      // Récupérer les noms des agents si c'est un client
+      if (role == 'client' && bookings.isNotEmpty) {
+        final uniqueAgentIds = bookings.map((b) => b.agentId).toSet().toList();
+        debugPrint('Récupération des noms pour ${uniqueAgentIds.length} agents uniques');
+
+        try {
+          final agentNames = await AgentNameService.getMultipleAgentNames(uniqueAgentIds);
+          _agentNames.clear();
+          _agentNames.addAll(agentNames);
+          debugPrint('Noms des agents récupérés avec succès: $agentNames');
+        } catch (e) {
+          debugPrint('Erreur lors de la récupération des noms: $e');
+          // Utiliser des noms par défaut
+          _agentNames.clear();
+          for (final agentId in uniqueAgentIds) {
+            _agentNames[agentId] = 'Agent $agentId';
+          }
+        }
+      }
+
+      _bookings = bookings;
+    } catch (e) {
       debugPrint('Database failed, using mock data: $e');
       // Fallback to mock data
       _bookings = TempDataService.getUserBookings(userId);
       _error = null; // Clear error since we have fallback data
-          }
+    }
 
     _isLoading = false;
     notifyListeners();
+    debugPrint('Nombre total de réservations dans le provider: ${_bookings.length}');
   }
 
+  
   // Get booking by ID
   Future<BookingModel?> getBookingById(String bookingId) async {
     _isLoading = true;
@@ -81,22 +142,31 @@ class BookingProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await FirebaseService.insertData(
+      debugPrint('Création de la réservation pour le client: $clientId');
+      debugPrint('Agent ID: $agentId');
+      debugPrint('Service: $serviceType');
+      debugPrint('Coût: $cost');
+
+      final bookingData = {
+        'client_id': clientId,
+        'agent_id': agentId,
+        'start_time': startTime.toIso8601String(),
+        'end_time': endTime.toIso8601String(),
+        'location': location,
+        'service_type': serviceType,
+        'cost': cost,
+        'status': FirebaseService.bookingStatusPending,
+        'notes': notes,
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      final bookingId = await FirebaseService.insertData(
         FirebaseService.bookingsCollection,
-        {
-          'client_id': clientId,
-          'agent_id': agentId,
-          'start_time': startTime.toIso8601String(),
-          'end_time': endTime.toIso8601String(),
-          'location': location,
-          'service_type': serviceType,
-          'cost': cost,
-          'status': FirebaseService.bookingStatusPending,
-          'notes': notes,
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        },
+        bookingData,
       );
+
+      debugPrint('Réservation créée avec ID: $bookingId');
 
       // Refresh bookings
       await fetchUserBookings(clientId, 'client');
@@ -104,6 +174,7 @@ class BookingProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
+      debugPrint('Erreur lors de la création de la réservation: $e');
       _error = e.toString();
       _isLoading = false;
       notifyListeners();

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/agent_simple.dart';
-import '../../models/booking_model.dart';
 import '../../providers/booking_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../utils/theme.dart';
 
 class AgentBookingScreen extends StatefulWidget {
@@ -60,21 +60,21 @@ class _AgentBookingScreenState extends State<AgentBookingScreen> {
   Future<void> _submitBooking() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final booking = BookingModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      clientId: 'current_user_id', // TODO: Remplacer par l'ID utilisateur réel
-      agentId: widget.agent.id,
-      startTime: _startTime,
-      endTime: _endTime,
-      location: _locationController.text.trim(),
-      serviceType: _selectedService,
-      cost: _cost,
-      status: BookingStatus.pending,
-      notes: _notesController.text.trim(),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      client: null,
-    );
+    // Récupérer l'ID utilisateur réel depuis l'AuthProvider
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currentUser = authProvider.currentUser;
+
+    if (currentUser == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur: Utilisateur non connecté'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+      return;
+    }
 
     try {
       // Afficher un indicateur de chargement
@@ -94,7 +94,7 @@ class _AgentBookingScreenState extends State<AgentBookingScreen> {
 
       final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
       await bookingProvider.createBooking(
-        clientId: 'current_user_id', // TODO: Remplacer par l'ID utilisateur réel
+        clientId: currentUser.id,
         agentId: widget.agent.id,
         startTime: _startTime,
         endTime: _endTime,
@@ -118,7 +118,8 @@ class _AgentBookingScreenState extends State<AgentBookingScreen> {
       }
     } catch (e) {
       if (mounted) {
-        Navigator.of(context).pop(); // Fermer le dialogue de chargement
+        // Fermer le dialogue de chargement s'il est ouvert
+        Navigator.of(context).pop();
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -163,31 +164,23 @@ class _AgentBookingScreenState extends State<AgentBookingScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              widget.agent.name,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                      Text(
+                        widget.agent.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              widget.agent.specialtyDisplay,
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              widget.agent.formattedHourlyRate,
-                              style: const TextStyle(
-                                color: AppColors.yellow,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.agent.specialtyDisplay,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
                         ),
                       ),
+                    ],
+                  ),
+                ),
                     ],
                   ),
                 ),
@@ -355,15 +348,14 @@ class _AgentBookingScreenState extends State<AgentBookingScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Coût estimé',
+                              'Détails',
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            Text(
-                              '${_cost.toStringAsFixed(0)} FCFA',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: AppColors.yellow,
-                                fontWeight: FontWeight.bold,
+                            const Text(
+                              'Le tarif sera communiqué après validation.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ],

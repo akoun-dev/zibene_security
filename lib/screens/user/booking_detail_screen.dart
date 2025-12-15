@@ -1,12 +1,33 @@
 import 'package:flutter/material.dart';
 import '../../models/booking_model.dart';
+import '../../services/agent_name_service.dart';
 import '../../utils/theme.dart';
-import 'messages_screen.dart';
-import 'rate_review_screen.dart';
 
-class BookingDetailScreen extends StatelessWidget {
+class BookingDetailScreen extends StatefulWidget {
   final BookingModel booking;
   const BookingDetailScreen({super.key, required this.booking});
+
+  @override
+  State<BookingDetailScreen> createState() => _BookingDetailScreenState();
+}
+
+class _BookingDetailScreenState extends State<BookingDetailScreen> {
+  String? _agentName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAgentName();
+  }
+
+  Future<void> _loadAgentName() async {
+    final name = await AgentNameService.getAgentNameWithFallback(widget.booking.agentId);
+    if (mounted) {
+      setState(() {
+        _agentName = name;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +38,17 @@ class BookingDetailScreen extends StatelessWidget {
         children: [
           Card(
             child: ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.person)),
-              title: Text('Agent assigné'),
-              subtitle: Text('En attente d\'assignation'),
-              trailing: _StatusChip(status: booking.status),
+              leading: CircleAvatar(
+                backgroundColor: AppColors.yellow.withValues(alpha: 0.15),
+                child: const Icon(Icons.person, color: AppColors.yellow),
+              ),
+              title: Text(_agentName ?? 'Chargement...'),
+              subtitle: Text(
+                widget.booking.agent != null && widget.booking.agent!.matricule.isNotEmpty
+                    ? 'Matricule: ${widget.booking.agent!.matricule}'
+                    : 'ID agent: ${widget.booking.agentId}',
+              ),
+              trailing: _StatusChip(status: widget.booking.status),
             ),
           ),
           const SizedBox(height: 12),
@@ -32,10 +60,10 @@ class BookingDetailScreen extends StatelessWidget {
                 children: [
                   const Text('Détails de la réservation', style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
-                  _Row('Début', booking.startTime.toString()),
-                  _Row('Fin', booking.endTime.toString()),
-                  _Row('Lieu', booking.location),
-                  _Row('Service', booking.serviceType),
+                  _Row('Début', _formatDateTime(widget.booking.startTime)),
+                  _Row('Fin', _formatDateTime(widget.booking.endTime)),
+                  _Row('Lieu', widget.booking.location),
+                  _Row('Service', widget.booking.serviceType),
                 ],
               ),
             ),
@@ -109,15 +137,22 @@ class _StatusChip extends StatelessWidget {
 }
 
 class _Row extends StatelessWidget {
-  final String label; final String value; final Color? valueColor;
-  const _Row(this.label, this.value, {this.valueColor});
+  final String label;
+  final String value;
+  const _Row(this.label, this.value);
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(children: [
         Expanded(child: Text(label, style: const TextStyle(color: AppColors.textSecondary))),
-        Text(value, style: TextStyle(fontWeight: FontWeight.w600, color: valueColor)),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
       ]),
     );
   }
@@ -138,4 +173,8 @@ class _TimelineItem extends StatelessWidget {
       ]),
     );
   }
+}
+
+String _formatDateTime(DateTime dateTime) {
+  return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year} à ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
 }

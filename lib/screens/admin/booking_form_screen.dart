@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../models/booking_model.dart';
-import '../../models/user_unified.dart';
-import '../../utils/theme.dart';
 
 class BookingFormScreen extends StatefulWidget {
   final BookingModel? booking;
@@ -17,7 +15,6 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   final _agentIdController = TextEditingController();
   final _locationController = TextEditingController();
   final _serviceTypeController = TextEditingController();
-  final _costController = TextEditingController();
   final _notesController = TextEditingController();
 
   DateTime _startTime = DateTime.now();
@@ -33,7 +30,6 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
       _agentIdController.text = widget.booking!.agentId;
       _locationController.text = widget.booking!.location;
       _serviceTypeController.text = widget.booking!.serviceType;
-      _costController.text = widget.booking!.cost.toString();
       _notesController.text = widget.booking!.notes ?? '';
       _startTime = widget.booking!.startTime;
       _endTime = widget.booking!.endTime;
@@ -47,7 +43,6 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     _agentIdController.dispose();
     _locationController.dispose();
     _serviceTypeController.dispose();
-    _costController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -155,26 +150,6 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Le lieu est requis';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Cost
-              TextFormField(
-                controller: _costController,
-                decoration: const InputDecoration(
-                  labelText: 'Coût (€)',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Le coût est requis';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Veuillez entrer un nombre valide';
                   }
                   return null;
                 },
@@ -312,8 +287,6 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
         return 'Annulé';
       case BookingStatus.rejected:
         return 'Rejeté';
-      default:
-        return 'Inconnu';
     }
   }
 }

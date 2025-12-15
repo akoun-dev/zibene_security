@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/booking_model.dart';
 import '../../providers/booking_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/firebase_service.dart';
 import '../../utils/theme.dart';
 import 'package:intl/intl.dart';
 
@@ -71,21 +72,20 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   Future<void> _submitBooking() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final booking = BookingModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      clientId: 'current_user_id', // TODO: Remplacer par l'ID utilisateur réel
-      agentId: 'agent_default',
-      startTime: _startTime,
-      endTime: _endTime,
-      location: _locationController.text.trim(),
-      serviceType: _selectedServiceType,
-      cost: _cost,
-      status: BookingStatus.pending,
-      notes: _notesController.text.trim(),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      client: null, // Sera rempli par le provider
-    );
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currentUser = authProvider.utilisateurActuel;
+    final clientId = currentUser?.id ?? FirebaseService.currentUserId;
+    final roleName = currentUser?.role.name ?? 'client';
+
+    if (clientId == null || clientId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Impossible de créer la réservation : utilisateur non authentifié'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+      return;
+    }
 
     try {
       // Afficher un indicateur de chargement
@@ -105,7 +105,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
 
       final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
       await bookingProvider.createBooking(
-        clientId: 'current_user_id', // TODO: Remplacer par l'ID utilisateur réel
+        clientId: clientId,
         agentId: 'agent_default',
         startTime: _startTime,
         endTime: _endTime,
@@ -114,28 +114,27 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
         cost: _cost,
         notes: _notesController.text.trim(),
       );
+      await bookingProvider.fetchUserBookings(clientId, roleName);
 
+      if (!mounted) return;
       Navigator.of(context).pop(); // Fermer le dialogue de chargement
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Réservation créée avec succès !'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-        Navigator.of(context).pop(); // Retour à l'écran précédent
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Réservation créée avec succès !'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      Navigator.of(context).pop(); // Retour à l'écran précédent
     } catch (e) {
-      if (mounted) {
-        Navigator.of(context).pop(); // Fermer le dialogue de chargement
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors de la réservation: $e'),
-            backgroundColor: AppColors.danger,
-          ),
-        );
-      }
+      if (!mounted) return;
+      Navigator.of(context).pop(); // Fermer le dialogue de chargement
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors de la réservation: $e'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
     }
   }
 
