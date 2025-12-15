@@ -174,7 +174,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                             ],
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(50),
                             child: Image.asset(
                               'assets/images/bee-logo.png',
                               width: 50,
