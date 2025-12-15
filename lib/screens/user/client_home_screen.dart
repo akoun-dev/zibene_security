@@ -66,6 +66,27 @@ class ClientHomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Logo en haut de la page
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Image.asset(
+                  'assets/images/bee-logo.png',
+                  width: ResponsiveUtils.getResponsiveFontSize(
+                    context,
+                    mobileSize: 80,
+                    tabletSize: 100,
+                    desktopSize: 120,
+                  ),
+                  height: ResponsiveUtils.getResponsiveFontSize(
+                    context,
+                    mobileSize: 80,
+                    tabletSize: 100,
+                    desktopSize: 120,
+                  ),
+                ),
+              ),
+            ),
             Row(
               children: [
                 Expanded(
