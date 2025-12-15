@@ -18,11 +18,7 @@ class ClientHomeScreen extends StatelessWidget {
     final user = userProvider.currentUser;
 
     if (userProvider.isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (userProvider.error != null) {
@@ -31,11 +27,7 @@ class ClientHomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: AppColors.danger,
-              ),
+              Icon(Icons.error_outline, size: 64, color: AppColors.danger),
               const SizedBox(height: 16),
               Text(
                 'Erreur de chargement',
@@ -66,11 +58,7 @@ class ClientHomeScreen extends StatelessWidget {
     }
 
     if (user == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return SafeArea(
@@ -87,17 +75,50 @@ class ClientHomeScreen extends StatelessWidget {
                       Text(
                         'welcome_back'.t(context),
                         style: TextStyle(
-                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobileSize: 14, tabletSize: 16, desktopSize: 18),
+                          fontSize: ResponsiveUtils.getResponsiveFontSize(
+                            context,
+                            mobileSize: 14,
+                            tabletSize: 16,
+                            desktopSize: 18,
+                          ),
                           color: AppColors.textSecondary,
                         ),
                       ),
-                      SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context) * 0.3),
-                      Text(
-                        user.name,
-                        style: TextStyle(
-                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobileSize: 22, tabletSize: 24, desktopSize: 26),
-                          fontWeight: FontWeight.bold,
-                        ),
+                      SizedBox(
+                        height:
+                            ResponsiveUtils.getResponsiveSpacing(context) * 0.3,
+                      ),
+                      Row(
+                        children: [
+                          Image.asset(
+                            'assets/icon/icon.png',
+                            width: ResponsiveUtils.getResponsiveFontSize(
+                              context,
+                              mobileSize: 24,
+                              tabletSize: 28,
+                              desktopSize: 32,
+                            ),
+                            height: ResponsiveUtils.getResponsiveFontSize(
+                              context,
+                              mobileSize: 24,
+                              tabletSize: 28,
+                              desktopSize: 32,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            user.name,
+                            style: TextStyle(
+                              fontSize: ResponsiveUtils.getResponsiveFontSize(
+                                context,
+                                mobileSize: 22,
+                                tabletSize: 24,
+                                desktopSize: 26,
+                              ),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -143,9 +164,7 @@ class ClientHomeScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'book_certified_agent_minutes'.t(context),
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                    ),
+                    style: const TextStyle(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 16),
                   Semantics(
@@ -158,7 +177,9 @@ class ClientHomeScreen extends StatelessWidget {
                         onPressed: () {
                           // Redirection vers la page de création de réservation
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const BookingFormScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const BookingFormScreen(),
+                            ),
                           );
                         },
                         child: Text('Réserver un service'),
@@ -172,7 +193,12 @@ class ClientHomeScreen extends StatelessWidget {
             Text(
               'quick_stats'.t(context),
               style: TextStyle(
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobileSize: 16, tabletSize: 18, desktopSize: 20),
+                fontSize: ResponsiveUtils.getResponsiveFontSize(
+                  context,
+                  mobileSize: 16,
+                  tabletSize: 18,
+                  desktopSize: 20,
+                ),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -182,9 +208,28 @@ class ClientHomeScreen extends StatelessWidget {
               label: 'Statistiques rapides',
               child: Row(
                 children: [
-                  Expanded(child: _StatCard(title: 'active_users'.t(context), value: '0', trend: '+5%', semanticLabel: 'Utilisateurs actifs')),
-                  SizedBox(width: ResponsiveUtils.getResponsiveSpacing(context)),
-                  Expanded(child: _StatCard(title: 'upcoming'.t(context), value: bookingProvider.bookings.where((b) => b.clientId == user.id).length.toString(), trend: '+2%', semanticLabel: 'Réservations à venir')),
+                  Expanded(
+                    child: _StatCard(
+                      title: 'active_users'.t(context),
+                      value: '0',
+                      trend: '+5%',
+                      semanticLabel: 'Utilisateurs actifs',
+                    ),
+                  ),
+                  SizedBox(
+                    width: ResponsiveUtils.getResponsiveSpacing(context),
+                  ),
+                  Expanded(
+                    child: _StatCard(
+                      title: 'upcoming'.t(context),
+                      value: bookingProvider.bookings
+                          .where((b) => b.clientId == user.id)
+                          .length
+                          .toString(),
+                      trend: '+2%',
+                      semanticLabel: 'Réservations à venir',
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -192,7 +237,12 @@ class ClientHomeScreen extends StatelessWidget {
             Text(
               'quick_actions'.t(context),
               style: TextStyle(
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobileSize: 16, tabletSize: 18, desktopSize: 20),
+                fontSize: ResponsiveUtils.getResponsiveFontSize(
+                  context,
+                  mobileSize: 16,
+                  tabletSize: 18,
+                  desktopSize: 20,
+                ),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -208,18 +258,24 @@ class ClientHomeScreen extends StatelessWidget {
                       label: 'view_bookings'.t(context),
                       semanticLabel: 'Voir mes réservations',
                       onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const BookingsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const BookingsScreen(),
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(width: ResponsiveUtils.getResponsiveSpacing(context)),
+                  SizedBox(
+                    width: ResponsiveUtils.getResponsiveSpacing(context),
+                  ),
                   Expanded(
                     child: _ActionButton(
                       icon: Icons.bookmark_border,
                       label: 'my_bookings'.t(context),
                       semanticLabel: 'Mes réservations',
                       onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const BookingsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const BookingsScreen(),
+                        ),
                       ),
                     ),
                   ),
@@ -239,7 +295,12 @@ class _StatCard extends StatelessWidget {
   final String trend;
   final String? semanticLabel;
 
-  const _StatCard({required this.title, required this.value, required this.trend, this.semanticLabel});
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.trend,
+    this.semanticLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -249,7 +310,9 @@ class _StatCard extends StatelessWidget {
       value: '$value, tendance $trend',
       child: Card(
         child: Padding(
-          padding: EdgeInsets.all(ResponsiveUtils.getResponsiveSpacing(context)),
+          padding: EdgeInsets.all(
+            ResponsiveUtils.getResponsiveSpacing(context),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -257,23 +320,42 @@ class _StatCard extends StatelessWidget {
                 title,
                 style: TextStyle(
                   color: AppColors.textSecondary,
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobileSize: 14, tabletSize: 15, desktopSize: 16),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(
+                    context,
+                    mobileSize: 14,
+                    tabletSize: 15,
+                    desktopSize: 16,
+                  ),
                 ),
               ),
-              SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context) * 0.7),
+              SizedBox(
+                height: ResponsiveUtils.getResponsiveSpacing(context) * 0.7,
+              ),
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobileSize: 28, tabletSize: 32, desktopSize: 36),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(
+                    context,
+                    mobileSize: 28,
+                    tabletSize: 32,
+                    desktopSize: 36,
+                  ),
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context) * 0.5),
+              SizedBox(
+                height: ResponsiveUtils.getResponsiveSpacing(context) * 0.5,
+              ),
               Text(
                 trend,
                 style: TextStyle(
                   color: AppColors.success,
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobileSize: 12, tabletSize: 13, desktopSize: 14),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(
+                    context,
+                    mobileSize: 12,
+                    tabletSize: 13,
+                    desktopSize: 14,
+                  ),
                 ),
               ),
             ],
@@ -307,7 +389,9 @@ class _ActionButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.yellow,
           side: const BorderSide(color: AppColors.yellow),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           padding: EdgeInsets.symmetric(
             vertical: ResponsiveUtils.getResponsiveButtonHeight(context) * 0.33,
           ),
@@ -318,14 +402,26 @@ class _ActionButton extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: ResponsiveUtils.getResponsiveFontSize(context, mobileSize: 24, tabletSize: 28, desktopSize: 32),
+              size: ResponsiveUtils.getResponsiveFontSize(
+                context,
+                mobileSize: 24,
+                tabletSize: 28,
+                desktopSize: 32,
+              ),
               semanticLabel: semanticLabel ?? label,
             ),
-            SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context) * 0.7),
+            SizedBox(
+              height: ResponsiveUtils.getResponsiveSpacing(context) * 0.7,
+            ),
             Text(
               label,
               style: TextStyle(
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobileSize: 14, tabletSize: 15, desktopSize: 16),
+                fontSize: ResponsiveUtils.getResponsiveFontSize(
+                  context,
+                  mobileSize: 14,
+                  tabletSize: 15,
+                  desktopSize: 16,
+                ),
               ),
             ),
           ],

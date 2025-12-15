@@ -38,7 +38,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       // Get additional stats from providers
       if (!mounted) return;
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
+      final bookingProvider = Provider.of<BookingProvider>(
+        context,
+        listen: false,
+      );
 
       // Load all users data
       await userProvider.fetchUsers();
@@ -79,44 +82,65 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Widget _buildRecentActivity() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
+    final bookingProvider = Provider.of<BookingProvider>(
+      context,
+      listen: false,
+    );
 
     List<Widget> activityItems = [];
 
     // Add recent bookings
     if (bookingProvider.bookings.isNotEmpty) {
       activityItems.addAll(
-        bookingProvider.bookings.take(3).map((booking) => Card(
-          child: ListTile(
-            leading: const Icon(Icons.calendar_today, color: AppColors.yellow),
-            title: Text('Nouvelle réservation'),
-            subtitle: Text('${booking.client?.name ?? 'Client'} - ${booking.serviceType}'),
-            trailing: Text(
-              booking.statusDisplay,
-              style: TextStyle(
-                color: booking.status == BookingStatus.pending ? AppColors.warning : AppColors.success,
-                fontWeight: FontWeight.bold,
+        bookingProvider.bookings
+            .take(3)
+            .map(
+              (booking) => Card(
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.calendar_today,
+                    color: AppColors.yellow,
+                  ),
+                  title: Text('Nouvelle réservation'),
+                  subtitle: Text(
+                    '${booking.client?.name ?? 'Client'} - ${booking.serviceType}',
+                  ),
+                  trailing: Text(
+                    booking.statusDisplay,
+                    style: TextStyle(
+                      color: booking.status == BookingStatus.pending
+                          ? AppColors.warning
+                          : AppColors.success,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        )),
       );
     }
 
     // Add recent users
     if (userProvider.users.isNotEmpty) {
       activityItems.addAll(
-        userProvider.users.take(2).map((user) => Card(
-          child: ListTile(
-            leading: const Icon(Icons.person_add, color: AppColors.yellow),
-            title: Text('Nouvel utilisateur inscrit'),
-            subtitle: Text('${user.name} - ${user.role.name}'),
-            trailing: Icon(
-              user.isActive ? Icons.check_circle : Icons.cancel,
-              color: user.isActive ? AppColors.success : AppColors.danger,
+        userProvider.users
+            .take(2)
+            .map(
+              (user) => Card(
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.person_add,
+                    color: AppColors.yellow,
+                  ),
+                  title: Text('Nouvel utilisateur inscrit'),
+                  subtitle: Text('${user.name} - ${user.role.name}'),
+                  trailing: Icon(
+                    user.isActive ? Icons.check_circle : Icons.cancel,
+                    color: user.isActive ? AppColors.success : AppColors.danger,
+                  ),
+                ),
+              ),
             ),
-          ),
-        )),
       );
     }
 
@@ -130,9 +154,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       );
     }
 
-    return Column(
-      children: activityItems,
-    );
+    return Column(children: activityItems);
   }
 
   @override
@@ -150,14 +172,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Tableau de bord',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            Image.asset(
+                              'assets/icon/icon.png',
+                              width: 32,
+                              height: 32,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Tableau de bord',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -196,53 +228,78 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               else
                 Column(
                   children: [
-                    Row(children: [
-                      Expanded(child: _StatCard(
-                        title: 'Utilisateurs totaux',
-                        value: _systemStats['totalUsers']?.toString() ?? '0',
-                        trend: '0%',
-                        icon: Icons.people
-                      )),
-                      const SizedBox(width: 12),
-                      Expanded(child: _StatCard(
-                        title: 'Agents actifs',
-                        value: _systemStats['activeAgents']?.toString() ?? '0',
-                        trend: '0%',
-                        icon: Icons.shield
-                      )),
-                    ]),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _StatCard(
+                            title: 'Utilisateurs totaux',
+                            value:
+                                _systemStats['totalUsers']?.toString() ?? '0',
+                            trend: '0%',
+                            icon: Icons.people,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _StatCard(
+                            title: 'Agents actifs',
+                            value:
+                                _systemStats['activeAgents']?.toString() ?? '0',
+                            trend: '0%',
+                            icon: Icons.shield,
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 12),
-                    Row(children: [
-                      Expanded(child: _StatCard(
-                        title: 'Réservations en attente',
-                        value: _systemStats['pendingBookings']?.toString() ?? '0',
-                        trend: '0%',
-                        icon: Icons.pending
-                      )),
-                      const SizedBox(width: 12),
-                      Expanded(child: _StatCard(
-                        title: 'Réservations totales',
-                        value: _systemStats['totalBookings']?.toString() ?? '0',
-                        trend: '0%',
-                        icon: Icons.calendar_today
-                      )),
-                    ]),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _StatCard(
+                            title: 'Réservations en attente',
+                            value:
+                                _systemStats['pendingBookings']?.toString() ??
+                                '0',
+                            trend: '0%',
+                            icon: Icons.pending,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _StatCard(
+                            title: 'Réservations totales',
+                            value:
+                                _systemStats['totalBookings']?.toString() ??
+                                '0',
+                            trend: '0%',
+                            icon: Icons.calendar_today,
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 12),
-                    Row(children: [
-                      Expanded(child: _StatCard(
-                        title: 'Agents totaux',
-                        value: _systemStats['totalAgents']?.toString() ?? '0',
-                        trend: '0%',
-                        icon: Icons.group
-                      )),
-                      const SizedBox(width: 12),
-                      Expanded(child: _StatCard(
-                        title: 'Taux de complétion',
-                        value: '${_calculateCompletionRate()}%',
-                        trend: '0%',
-                        icon: Icons.trending_up
-                      )),
-                    ]),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _StatCard(
+                            title: 'Agents totaux',
+                            value:
+                                _systemStats['totalAgents']?.toString() ?? '0',
+                            trend: '0%',
+                            icon: Icons.group,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _StatCard(
+                            title: 'Taux de complétion',
+                            value: '${_calculateCompletionRate()}%',
+                            trend: '0%',
+                            icon: Icons.trending_up,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               const SizedBox(height: 24),
@@ -309,18 +366,26 @@ class _StatCard extends StatelessWidget {
                 Text(
                   trend,
                   style: TextStyle(
-                    color: trend.startsWith('-') ? AppColors.danger : AppColors.success,
+                    color: trend.startsWith('-')
+                        ? AppColors.danger
+                        : AppColors.success,
                     fontSize: 12,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 4),
             Text(
               title,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
