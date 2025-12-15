@@ -16,7 +16,14 @@ class WelcomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
-              Image.asset('assets/images/bee-logo.png', width: 96, height: 96),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: Image.asset(
+                  'assets/images/bee-logo.png',
+                  width: 96,
+                  height: 96,
+                ),
+              ),
               const SizedBox(height: 16),
               const Text(
                 'ZIBENE SÉCURITÉ',
