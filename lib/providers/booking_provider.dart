@@ -21,7 +21,20 @@ class BookingProvider extends ChangeNotifier {
     if (_agentNames.containsKey(agentId)) {
       return _agentNames[agentId]!;
     }
-    return 'Agent $agentId'; // Fallback immédiat
+    // Utiliser le fallback avec les données de test
+    _loadAgentNameFallback(agentId);
+    return 'Agent $agentId'; // Fallback immédiat pendant le chargement
+  }
+
+  // Charger le nom d'un agent en utilisant le fallback
+  Future<void> _loadAgentNameFallback(String agentId) async {
+    try {
+      final name = await AgentNameService.getAgentNameWithFallback(agentId);
+      _agentNames[agentId] = name;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Erreur lors du chargement du nom de l\'agent $agentId: $e');
+    }
   }
 
   // Forcer le rechargement des noms d'agents
@@ -33,13 +46,34 @@ class BookingProvider extends ChangeNotifier {
     final uniqueAgentIds = _bookings.map((b) => b.agentId).toSet().toList();
 
     try {
-      final agentNames = await AgentNameService.getMultipleAgentNames(uniqueAgentIds);
+      final agentNames = await AgentNameService.getMultipleAgentNames(
+        uniqueAgentIds,
+      );
       _agentNames.clear();
       _agentNames.addAll(agentNames);
       debugPrint('Noms des agents rechargés: $agentNames');
+
+      // Vérifier si tous les noms ont été trouvés, sinon utiliser le fallback
+      for (final agentId in uniqueAgentIds) {
+        if (!_agentNames.containsKey(agentId)) {
+          final fallbackName = await AgentNameService.getAgentNameWithFallback(
+            agentId,
+          );
+          _agentNames[agentId] = fallbackName;
+        }
+      }
+
       notifyListeners();
     } catch (e) {
       debugPrint('Erreur lors du rechargement des noms: $e');
+      // Utiliser le fallback pour tous les agents
+      for (final agentId in uniqueAgentIds) {
+        final fallbackName = await AgentNameService.getAgentNameWithFallback(
+          agentId,
+        );
+        _agentNames[agentId] = fallbackName;
+      }
+      notifyListeners();
     }
   }
 
@@ -49,12 +83,17 @@ class BookingProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    debugPrint('Récupération des réservations pour userId: $userId, role: $role');
+    debugPrint(
+      'Récupération des réservations pour userId: $userId, role: $role',
+    );
 
     try {
       final bookingsData = await FirebaseService.getData(
         FirebaseService.bookingsCollection,
-        where: (query) => query.where(role == 'client' ? 'client_id' : 'agent_id', isEqualTo: userId),
+        where: (query) => query.where(
+          role == 'client' ? 'client_id' : 'agent_id',
+          isEqualTo: userId,
+        ),
         orderBy: 'created_at',
         descending: true,
       );
@@ -69,19 +108,34 @@ class BookingProvider extends ChangeNotifier {
       // Récupérer les noms des agents si c'est un client
       if (role == 'client' && bookings.isNotEmpty) {
         final uniqueAgentIds = bookings.map((b) => b.agentId).toSet().toList();
-        debugPrint('Récupération des noms pour ${uniqueAgentIds.length} agents uniques');
+        debugPrint(
+          'Récupération des noms pour ${uniqueAgentIds.length} agents uniques',
+        );
 
         try {
-          final agentNames = await AgentNameService.getMultipleAgentNames(uniqueAgentIds);
+          final agentNames = await AgentNameService.getMultipleAgentNames(
+            uniqueAgentIds,
+          );
           _agentNames.clear();
           _agentNames.addAll(agentNames);
           debugPrint('Noms des agents récupérés avec succès: $agentNames');
+
+          // Vérifier si tous les noms ont été trouvés, sinon utiliser le fallback
+          for (final agentId in uniqueAgentIds) {
+            if (!_agentNames.containsKey(agentId)) {
+              final fallbackName =
+                  await AgentNameService.getAgentNameWithFallback(agentId);
+              _agentNames[agentId] = fallbackName;
+            }
+          }
         } catch (e) {
           debugPrint('Erreur lors de la récupération des noms: $e');
-          // Utiliser des noms par défaut
+          // Utiliser le fallback pour tous les agents
           _agentNames.clear();
           for (final agentId in uniqueAgentIds) {
-            _agentNames[agentId] = 'Agent $agentId';
+            final fallbackName =
+                await AgentNameService.getAgentNameWithFallback(agentId);
+            _agentNames[agentId] = fallbackName;
           }
         }
       }
@@ -96,10 +150,11 @@ class BookingProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
-    debugPrint('Nombre total de réservations dans le provider: ${_bookings.length}');
+    debugPrint(
+      'Nombre total de réservations dans le provider: ${_bookings.length}',
+    );
   }
 
-  
   // Get booking by ID
   Future<BookingModel?> getBookingById(String bookingId) async {
     _isLoading = true;
@@ -107,10 +162,13 @@ class BookingProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final bookingData = await FirebaseService.getDataById(FirebaseService.bookingsCollection, bookingId);
+      final bookingData = await FirebaseService.getDataById(
+        FirebaseService.bookingsCollection,
+        bookingId,
+      );
       if (bookingData != null) {
         _currentBooking = BookingModel.fromJson(bookingData);
-              }
+      }
     } catch (e) {
       debugPrint('Database booking lookup failed, using mock data: $e');
       // Fallback to mock data
@@ -119,7 +177,7 @@ class BookingProvider extends ChangeNotifier {
         orElse: () => TempDataService.getMockBookings().first,
       );
       _error = null; // Clear error since we have fallback data
-          }
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -248,18 +306,12 @@ class BookingProvider extends ChangeNotifier {
 
   // Confirm booking
   Future<bool> confirmBooking(String bookingId) async {
-    return await updateBookingStatus(
-      bookingId: bookingId,
-      status: 'confirmed',
-    );
+    return await updateBookingStatus(bookingId: bookingId, status: 'confirmed');
   }
 
   // Complete booking
   Future<bool> completeBooking(String bookingId) async {
-    return await updateBookingStatus(
-      bookingId: bookingId,
-      status: 'completed',
-    );
+    return await updateBookingStatus(bookingId: bookingId, status: 'completed');
   }
 
   // Get upcoming bookings
@@ -274,17 +326,23 @@ class BookingProvider extends ChangeNotifier {
 
   // Get pending bookings
   List<BookingModel> get pendingBookings {
-    return _bookings.where((booking) => booking.status == BookingStatus.pending).toList();
+    return _bookings
+        .where((booking) => booking.status == BookingStatus.pending)
+        .toList();
   }
 
   // Get confirmed bookings
   List<BookingModel> get confirmedBookings {
-    return _bookings.where((booking) => booking.status == BookingStatus.confirmed).toList();
+    return _bookings
+        .where((booking) => booking.status == BookingStatus.confirmed)
+        .toList();
   }
 
   // Get cancelled bookings
   List<BookingModel> get cancelledBookings {
-    return _bookings.where((booking) => booking.status == BookingStatus.cancelled).toList();
+    return _bookings
+        .where((booking) => booking.status == BookingStatus.cancelled)
+        .toList();
   }
 
   // Get bookings by agent
